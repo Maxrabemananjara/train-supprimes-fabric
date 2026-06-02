@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# Environment and secrets
+.env
+.env.*
+*.key
+*.pem
+
+# Local artifacts
+*.log
+*.tmp
+*.cache
+
+# Data outputs
+data/bronze/
+data/silver/
+data/gold/
+exports/
+
+# Node / frontend
+node_modules/
+dist/
+build/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
