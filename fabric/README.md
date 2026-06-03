@@ -13,6 +13,12 @@ Le workspace Fabric cible est :
 Projet_Trains_Supprimes_Fabric
 ```
 
+Le Lakehouse cible est :
+
+```text
+lh_trains_supprimes
+```
+
 Les zones de donnees attendues sont :
 
 ```text
@@ -21,3 +27,4 @@ silver
 gold
 ```
 
+La structure initiale du Lakehouse est decrite dans `LAKEHOUSE.md`.
