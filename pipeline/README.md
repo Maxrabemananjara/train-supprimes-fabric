@@ -16,4 +16,6 @@ Le pipeline devra etre executable automatiquement chaque jour et relancable manu
 
 Le premier script d'ingestion Bronze est `ingest_bronze.py`.
 
+La transformation Silver est portee par `transform_silver.py`.
+
 La source de donnees est decrite dans `SOURCES.md`.

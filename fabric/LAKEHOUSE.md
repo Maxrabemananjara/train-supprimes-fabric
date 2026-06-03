@@ -29,6 +29,19 @@ Files/
 
 `gold` contient les sorties pretes a alimenter le tableau de bord public et le suivi qualite.
 
+## Sorties Silver
+
+```text
+Files/
+  silver/
+    trains_supprimes/
+      date_traitement=YYYY-MM-DD/
+        silver_trains_supprimes.csv
+        quality_report.json
+```
+
+La sortie Silver applique les controles de base : colonnes attendues, valeurs obligatoires, dates exploitables, duree positive et suppression des doublons exacts.
+
 ## Tables prevues
 
 ```text
