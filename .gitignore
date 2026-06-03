@@ -11,6 +11,9 @@ env/
 .env.*
 *.key
 *.pem
+.fabric-auth/
+.fabric-cli-venv/
+.fabric-cli-config/
 
 # Local artifacts
 *.log

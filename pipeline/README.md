@@ -14,3 +14,6 @@ ingestion data.gouv
 
 Le pipeline devra etre executable automatiquement chaque jour et relancable manuellement.
 
+Le premier script d'ingestion Bronze est `ingest_bronze.py`.
+
+La source de donnees est decrite dans `SOURCES.md`.
