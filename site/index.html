@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Trains supprimés</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Navigation">
+        <div class="brand-mark">SNCF</div>
+        <button class="nav-button active" type="button" title="Vue globale" aria-label="Vue globale">
+          <span>⌂</span>
+        </button>
+        <button class="nav-button" type="button" title="Gares" aria-label="Gares">
+          <span>⌖</span>
+        </button>
+        <button class="nav-button" type="button" title="Liaisons" aria-label="Liaisons">
+          <span>↔</span>
+        </button>
+        <button class="nav-button" type="button" title="Qualité" aria-label="Qualité">
+          <span>✓</span>
+        </button>
+      </aside>
+
+      <main class="dashboard">
+        <header class="page-header">
+          <div>
+            <p class="eyebrow">Suivi quotidien</p>
+            <h1>Trains supprimés</h1>
+            <p class="subtitle">Lecture métier des suppressions publiées en open data.</p>
+          </div>
+          <div class="filters" aria-label="Filtres">
+            <button class="filter-pill active" type="button">Aujourd’hui</button>
+            <button class="filter-pill" type="button">7 jours</button>
+            <button class="filter-pill" type="button">30 jours</button>
+            <label class="select-filter">
+              <span>Région</span>
+              <select>
+                <option>Toutes</option>
+              </select>
+            </label>
+            <label class="select-filter">
+              <span>Type</span>
+              <select>
+                <option>Tous</option>
+              </select>
+            </label>
+          </div>
+        </header>
+
+        <section class="kpi-grid" aria-label="Indicateurs clés">
+          <article class="kpi-card">
+            <div class="kpi-icon">#</div>
+            <p>Trains supprimés</p>
+            <strong data-kpi="total">-</strong>
+            <span data-kpi="period">Période en cours</span>
+          </article>
+          <article class="kpi-card">
+            <div class="kpi-icon">↗</div>
+            <p>Évolution</p>
+            <strong data-kpi="evolution">-</strong>
+            <span data-kpi="evolution-detail">Comparaison disponible après historique.</span>
+          </article>
+          <article class="kpi-card">
+            <div class="kpi-icon">⌖</div>
+            <p>Gare la plus touchée</p>
+            <strong data-kpi="station">-</strong>
+            <span data-kpi="station-count">-</span>
+          </article>
+          <article class="kpi-card">
+            <div class="kpi-icon">↔</div>
+            <p>Liaison sensible</p>
+            <strong data-kpi="route">-</strong>
+            <span data-kpi="route-count">-</span>
+          </article>
+          <article class="kpi-card">
+            <div class="kpi-icon">✓</div>
+            <p>Dernière mise à jour</p>
+            <strong data-kpi="updated">-</strong>
+            <span data-kpi="quality">Contrôle en attente</span>
+          </article>
+        </section>
+
+        <section class="status-strip" aria-label="Statut des données">
+          <span>Données publiques data.gouv</span>
+          <span data-status="quality">Contrôles qualité</span>
+          <span>Mise à jour quotidienne</span>
+        </section>
+
+        <section class="content-grid">
+          <article class="panel panel-large">
+            <div class="panel-header">
+              <h2>Évolution quotidienne</h2>
+              <span data-panel="daily-total">-</span>
+            </div>
+            <div id="daily-chart" class="line-chart" aria-label="Evolution quotidienne"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <h2>Gares les plus touchées</h2>
+              <span>Top départ</span>
+            </div>
+            <div id="station-chart" class="bar-list"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <h2>Type de train</h2>
+              <span>Répartition</span>
+            </div>
+            <div class="donut-layout">
+              <div id="category-donut" class="donut" aria-label="Répartition par type de train"></div>
+              <div id="category-legend" class="legend-list"></div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <h2>Tranches horaires</h2>
+              <span>Départs</span>
+            </div>
+            <div id="slot-chart" class="mini-bars"></div>
+          </article>
+        </section>
+
+        <section class="panel table-panel">
+          <div class="panel-header">
+            <h2>Liaisons les plus concernées</h2>
+            <span>Classement</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Départ</th>
+                  <th>Arrivée</th>
+                  <th>Type principal</th>
+                  <th>Suppressions</th>
+                </tr>
+              </thead>
+              <tbody id="routes-table"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

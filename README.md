@@ -32,5 +32,6 @@ data-samples/  Exemples de donnees non sensibles
 
 ## Statut
 
-Phase de cadrage validee. La prochaine etape consiste a connecter le workspace Microsoft Fabric au depot GitHub, puis a creer les premiers objets Lakehouse / Notebook.
+Le depot contient la structure du projet, l'ingestion Bronze, la transformation Silver, la preparation Gold du dashboard et le site public.
 
+Le dashboard public est porte par le dossier `site/` et publie via GitHub Pages.

@@ -9,6 +9,5 @@ Direction visuelle retenue :
 - navigation laterale ;
 - cartes KPI ;
 - graphiques temporels ;
-- tableau des dernieres suppressions ;
-- bloc monitoring pipeline.
-
+- classement des gares et liaisons les plus concernees ;
+- tableau de synthese pour une lecture metier.

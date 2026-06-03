@@ -1,0 +1,200 @@
+{
+  "metadata": {
+    "published_at": "2026-06-04T00:13:13.113054+02:00",
+    "update_label": "04/06/2026 00:13",
+    "source_resource_title": "tr-rm-20260604.csv",
+    "source_extraction_date": "2026-06-03",
+    "quality_ok": true,
+    "rejected_row_count": 0
+  },
+  "kpis": {
+    "total_cancellations": 21,
+    "latest_departure_date": "2026-06-04",
+    "latest_day_cancellations": 21,
+    "previous_day_cancellations": 0,
+    "evolution_pct": null,
+    "evolution_label": "Nouveau",
+    "top_departure_station": "Clermont-Ferrand",
+    "top_departure_station_count": 7,
+    "top_route": "Clermont-Ferrand -> Le Puy-en-Velay",
+    "top_route_count": 3,
+    "unique_departure_stations": 10,
+    "unique_arrival_stations": 10
+  },
+  "charts": {
+    "daily_evolution": [
+      {
+        "date": "2026-06-04",
+        "value": 21
+      }
+    ],
+    "top_departure_stations": [
+      {
+        "label": "Clermont-Ferrand",
+        "value": 7
+      },
+      {
+        "label": "Bas - Monistrol",
+        "value": 3
+      },
+      {
+        "label": "Le Puy-en-Velay",
+        "value": 3
+      },
+      {
+        "label": "Saint-Étienne Châteaucreux",
+        "value": 2
+      },
+      {
+        "label": "Brioude",
+        "value": 1
+      },
+      {
+        "label": "Hirson",
+        "value": 1
+      },
+      {
+        "label": "Bar-le-Duc",
+        "value": 1
+      },
+      {
+        "label": "Lunéville",
+        "value": 1
+      }
+    ],
+    "top_arrival_stations": [
+      {
+        "label": "Clermont-Ferrand",
+        "value": 6
+      },
+      {
+        "label": "Le Puy-en-Velay",
+        "value": 3
+      },
+      {
+        "label": "Saint-Étienne Châteaucreux",
+        "value": 3
+      },
+      {
+        "label": "Bas - Monistrol",
+        "value": 2
+      },
+      {
+        "label": "Aurillac",
+        "value": 2
+      },
+      {
+        "label": "Valenciennes",
+        "value": 1
+      },
+      {
+        "label": "Lunéville",
+        "value": 1
+      },
+      {
+        "label": "Nîmes Centre",
+        "value": 1
+      }
+    ],
+    "category_distribution": [
+      {
+        "label": "Regional",
+        "value": 19
+      },
+      {
+        "label": "Interregional",
+        "value": 2
+      }
+    ],
+    "time_slot_distribution": [
+      {
+        "label": "00h-04h",
+        "value": 0
+      },
+      {
+        "label": "04h-08h",
+        "value": 9
+      },
+      {
+        "label": "08h-12h",
+        "value": 3
+      },
+      {
+        "label": "12h-16h",
+        "value": 0
+      },
+      {
+        "label": "16h-20h",
+        "value": 7
+      },
+      {
+        "label": "20h-00h",
+        "value": 2
+      }
+    ]
+  },
+  "tables": {
+    "top_routes": [
+      {
+        "departure": "Clermont-Ferrand",
+        "arrival": "Le Puy-en-Velay",
+        "main_type": "Regional",
+        "cancellations": 3
+      },
+      {
+        "departure": "Bas - Monistrol",
+        "arrival": "Saint-Étienne Châteaucreux",
+        "main_type": "Regional",
+        "cancellations": 3
+      },
+      {
+        "departure": "Le Puy-en-Velay",
+        "arrival": "Clermont-Ferrand",
+        "main_type": "Regional",
+        "cancellations": 3
+      },
+      {
+        "departure": "Saint-Étienne Châteaucreux",
+        "arrival": "Bas - Monistrol",
+        "main_type": "Regional",
+        "cancellations": 2
+      },
+      {
+        "departure": "Clermont-Ferrand",
+        "arrival": "Aurillac",
+        "main_type": "Regional",
+        "cancellations": 2
+      },
+      {
+        "departure": "Brioude",
+        "arrival": "Clermont-Ferrand",
+        "main_type": "Regional",
+        "cancellations": 1
+      },
+      {
+        "departure": "Hirson",
+        "arrival": "Valenciennes",
+        "main_type": "Regional",
+        "cancellations": 1
+      },
+      {
+        "departure": "Bar-le-Duc",
+        "arrival": "Lunéville",
+        "main_type": "Regional",
+        "cancellations": 1
+      },
+      {
+        "departure": "Clermont-Ferrand",
+        "arrival": "Nîmes Centre",
+        "main_type": "Interregional",
+        "cancellations": 1
+      },
+      {
+        "departure": "Lunéville",
+        "arrival": "Nancy",
+        "main_type": "Regional",
+        "cancellations": 1
+      }
+    ]
+  }
+}

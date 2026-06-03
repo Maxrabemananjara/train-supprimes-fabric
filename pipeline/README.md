@@ -18,4 +18,8 @@ Le premier script d'ingestion Bronze est `ingest_bronze.py`.
 
 La transformation Silver est portee par `transform_silver.py`.
 
+Les sorties Gold sont construites par `build_gold.py` a partir de l'historique Silver disponible. Elles peuvent aussi alimenter le site statique via `site/data/dashboard.json`.
+
+Le flux complet peut etre relance avec `run_daily.py`.
+
 La source de donnees est decrite dans `SOURCES.md`.

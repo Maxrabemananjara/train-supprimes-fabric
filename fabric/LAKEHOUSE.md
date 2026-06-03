@@ -27,7 +27,7 @@ Files/
 
 `silver` contient les donnees nettoyees et controlees avant aggregation.
 
-`gold` contient les sorties pretes a alimenter le tableau de bord public et le suivi qualite.
+`gold` contient les sorties pretes a alimenter le tableau de bord public et le suivi qualite. Les indicateurs sont recalcules depuis l'historique Silver disponible.
 
 ## Sorties Silver
 
@@ -49,8 +49,9 @@ silver_trains_supprimes
 gold_kpi
 gold_evolution_journaliere
 gold_repartition_type_train
-gold_top_gares
+gold_top_gares_depart
+gold_top_liaisons
 gold_qualite_pipeline
 ```
 
-Les tables seront creees a l'etape de transformation, apres la mise en place de l'ingestion.
+Les sorties Gold sont historisees par date de traitement dans `Files/gold/dashboard` et `Files/gold/quality`.
