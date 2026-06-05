@@ -23,7 +23,7 @@ Files/
 
 ## Role des zones
 
-`bronze` conserve les fichiers sources recuperes, avec une logique d'historisation par date d'extraction.
+`bronze` conserve les fichiers sources recuperes, avec une logique d'historisation par date d'extraction. Une extraction peut contenir plusieurs fichiers journaliers afin d'alimenter une periode recente.
 
 `silver` contient les donnees nettoyees et controlees avant aggregation.
 

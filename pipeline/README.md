@@ -14,7 +14,7 @@ ingestion data.gouv
 
 Le pipeline devra etre executable automatiquement chaque jour et relancable manuellement.
 
-Le premier script d'ingestion Bronze est `ingest_bronze.py`.
+Le premier script d'ingestion Bronze est `ingest_bronze.py`. Par defaut, il recupere les 30 derniers fichiers CSV disponibles pour alimenter une lecture metier sur une periode recente.
 
 La transformation Silver est portee par `transform_silver.py`.
 

@@ -36,6 +36,10 @@ function shortDate(value) {
   return date.toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
 }
 
+function periodLabel(kpis) {
+  return kpis.period_label || shortDate(kpis.latest_departure_date);
+}
+
 function setText(selector, value) {
   const element = document.querySelector(selector);
   if (element) element.textContent = value;
@@ -54,7 +58,7 @@ async function loadData() {
 function renderKpis(data) {
   const { metadata, kpis } = data;
   setText("[data-kpi='total']", numberFormat(kpis.total_cancellations));
-  setText("[data-kpi='period']", shortDate(kpis.latest_departure_date));
+  setText("[data-kpi='period']", periodLabel(kpis));
   setText("[data-kpi='evolution']", kpis.evolution_label || "-");
   setText(
     "[data-kpi='evolution-detail']",
@@ -99,8 +103,10 @@ function renderLineChart(data) {
   });
   const path = points.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
   const area = `${path} L ${points[points.length - 1].x} ${height - padding.bottom} L ${points[0].x} ${height - padding.bottom} Z`;
+  const labelEvery = Math.max(1, Math.ceil(points.length / 10));
   const labels = points
-    .map((point) => {
+    .map((point, index) => {
+      if (index % labelEvery !== 0 && index !== points.length - 1) return "";
       const date = new Date(`${point.date}T00:00:00`);
       const label = date.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
       return `<text class="axis-label" x="${point.x}" y="${height - 12}" text-anchor="middle">${label}</text>`;
