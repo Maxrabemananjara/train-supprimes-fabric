@@ -25,9 +25,9 @@ Files/
 
 `bronze` conserve les fichiers sources recuperes, avec une logique d'historisation par date d'extraction. Une extraction peut contenir plusieurs fichiers journaliers afin d'alimenter une periode recente.
 
-`silver` contient les donnees nettoyees et controlees avant aggregation.
+`silver` contient les donnees nettoyees et controlees avant modelisation.
 
-`gold` contient les sorties pretes a alimenter le tableau de bord public et le suivi qualite. Les indicateurs sont recalcules depuis l'historique Silver disponible.
+`gold` contient les sorties pretes a alimenter le tableau de bord public et le suivi qualite. Les indicateurs sont recalcules depuis une table de faits et des dimensions derivees de l'historique Silver disponible.
 
 ## Sorties Silver
 
@@ -51,6 +51,12 @@ gold_evolution_journaliere
 gold_repartition_type_train
 gold_top_gares_depart
 gold_top_liaisons
+fact_suppressions
+dim_date
+dim_gare
+dim_liaison
+dim_type_train
+dim_tranche_horaire
 gold_qualite_pipeline
 ```
 

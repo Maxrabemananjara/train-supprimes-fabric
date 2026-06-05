@@ -8,17 +8,17 @@ Flux cible :
 ingestion data.gouv
   -> controles Bronze
   -> nettoyage Silver
-  -> agregations Gold
+  -> modele Gold faits / dimensions
   -> export JSON pour le site
 ```
 
 Le pipeline devra etre executable automatiquement chaque jour et relancable manuellement.
 
-Le premier script d'ingestion Bronze est `ingest_bronze.py`. Par defaut, il recupere les 30 derniers fichiers CSV disponibles pour alimenter une lecture metier sur une periode recente.
+Le premier script d'ingestion Bronze est `ingest_bronze.py`. Par defaut, il recupere les 120 derniers fichiers CSV disponibles pour alimenter une lecture metier avec un historique suffisant.
 
 La transformation Silver est portee par `transform_silver.py`.
 
-Les sorties Gold sont construites par `build_gold.py` a partir de l'historique Silver disponible. Elles peuvent aussi alimenter le site statique via `site/data/dashboard.json`.
+Les sorties Gold sont construites par `build_gold.py` a partir de l'historique Silver disponible. Elles contiennent les indicateurs, les tables de dimensions et la table de faits utilisees par le site statique via `site/data/dashboard.json`.
 
 Le flux complet peut etre relance avec `run_daily.py`.
 

@@ -4,40 +4,68 @@ const fallbackData = {
     quality_ok: false,
     rejected_row_count: 0
   },
-  kpis: {
-    total_cancellations: 0,
-    latest_departure_date: "",
-    evolution_label: "-",
-    top_departure_station: "-",
-    top_departure_station_count: 0,
-    top_route: "-",
-    top_route_count: 0
-  },
-  charts: {
-    daily_evolution: [],
-    top_departure_stations: [],
-    category_distribution: [],
-    time_slot_distribution: []
-  },
-  tables: {
-    top_routes: []
+  model: {
+    dimensions: {
+      dates: [],
+      stations: [],
+      routes: [],
+      train_types: [],
+      time_slots: []
+    },
+    facts: []
   }
 };
 
 const magentaScale = ["#d0005f", "#a00065", "#ed6fa4", "#f2a8cb", "#f7c7dc", "#6f2254"];
+const state = {
+  period: "30",
+  stationId: "",
+  trainTypeId: ""
+};
+
+let dashboardData = fallbackData;
+let lookups = createLookups(fallbackData);
 
 function numberFormat(value) {
   return new Intl.NumberFormat("fr-FR").format(value || 0);
 }
 
-function shortDate(value) {
-  if (!value) return "Période en cours";
-  const date = new Date(`${value}T00:00:00`);
-  return date.toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
-function periodLabel(kpis) {
-  return kpis.period_label || shortDate(kpis.latest_departure_date);
+function parseDate(value) {
+  return new Date(`${value}T00:00:00`);
+}
+
+function dateKey(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function addDays(date, days) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+function shortDate(value) {
+  if (!value) return "Période en cours";
+  return parseDate(value).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
+}
+
+function compactDate(value) {
+  return parseDate(value).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
+}
+
+function periodLabel(startDate, endDate) {
+  if (!startDate || !endDate) return "Période en cours";
+  if (startDate === endDate) return shortDate(endDate);
+  return `Du ${compactDate(startDate)} au ${compactDate(endDate)}`;
 }
 
 function setText(selector, value) {
@@ -55,36 +83,209 @@ async function loadData() {
   }
 }
 
-function renderKpis(data) {
-  const { metadata, kpis } = data;
-  setText("[data-kpi='total']", numberFormat(kpis.total_cancellations));
-  setText("[data-kpi='period']", periodLabel(kpis));
-  setText("[data-kpi='evolution']", kpis.evolution_label || "-");
-  setText(
-    "[data-kpi='evolution-detail']",
-    kpis.previous_day_cancellations ? "Vs jour précédent" : "Historique en construction"
-  );
-  setText("[data-kpi='station']", kpis.top_departure_station || "-");
-  setText("[data-kpi='station-count']", `${numberFormat(kpis.top_departure_station_count)} suppression(s)`);
-  setText("[data-kpi='route']", kpis.top_route || "-");
-  setText("[data-kpi='route-count']", `${numberFormat(kpis.top_route_count)} suppression(s)`);
+function createMap(rows, idKey) {
+  return new Map((rows || []).map((row) => [row[idKey], row]));
+}
+
+function createLookups(data) {
+  const dimensions = data.model?.dimensions || {};
+  return {
+    dates: createMap(dimensions.dates, "date_id"),
+    stations: createMap(dimensions.stations, "station_id"),
+    routes: createMap(dimensions.routes, "route_id"),
+    trainTypes: createMap(dimensions.train_types, "train_type_id"),
+    timeSlots: createMap(dimensions.time_slots, "time_slot_id")
+  };
+}
+
+function availableFacts(data) {
+  return data.model?.facts || [];
+}
+
+function factCount(fact) {
+  return Number(fact.cancellations || 0);
+}
+
+function dateBounds(facts) {
+  const dates = facts.map((fact) => fact.date_id).filter(Boolean).sort();
+  return {
+    first: dates[0] || "",
+    latest: dates[dates.length - 1] || ""
+  };
+}
+
+function selectedRange(facts) {
+  const bounds = dateBounds(facts);
+  if (!bounds.latest) return { start: "", end: "", days: 0 };
+  if (state.period === "all") {
+    return {
+      start: bounds.first,
+      end: bounds.latest,
+      days: Math.max(1, Math.round((parseDate(bounds.latest) - parseDate(bounds.first)) / 86400000) + 1)
+    };
+  }
+
+  const days = Number(state.period);
+  const start = dateKey(addDays(parseDate(bounds.latest), -(days - 1)));
+  return { start, end: bounds.latest, days };
+}
+
+function previousRange(range) {
+  if (!range.start || !range.end || state.period === "all") return null;
+  const previousEnd = dateKey(addDays(parseDate(range.start), -1));
+  const previousStart = dateKey(addDays(parseDate(previousEnd), -(range.days - 1)));
+  return { start: previousStart, end: previousEnd, days: range.days };
+}
+
+function inRange(fact, range) {
+  if (!range?.start || !range?.end) return false;
+  return fact.date_id >= range.start && fact.date_id <= range.end;
+}
+
+function applyFilters(data, range) {
+  return availableFacts(data).filter((fact) => {
+    if (!inRange(fact, range)) return false;
+    if (state.trainTypeId && fact.train_type_id !== state.trainTypeId) return false;
+    if (
+      state.stationId &&
+      fact.departure_station_id !== state.stationId &&
+      fact.arrival_station_id !== state.stationId
+    ) {
+      return false;
+    }
+    return true;
+  });
+}
+
+function completeDailySeries(facts, range) {
+  const byDate = new Map();
+  facts.forEach((fact) => byDate.set(fact.date_id, (byDate.get(fact.date_id) || 0) + factCount(fact)));
+  const series = [];
+  if (!range.start || !range.end) return series;
+
+  for (let current = parseDate(range.start); dateKey(current) <= range.end; current = addDays(current, 1)) {
+    const key = dateKey(current);
+    series.push({ date: key, value: byDate.get(key) || 0 });
+  }
+  return series;
+}
+
+function topItems(counter, limit = 8) {
+  return [...counter.entries()]
+    .map(([label, value]) => ({ label, value }))
+    .sort((a, b) => b.value - a.value || a.label.localeCompare(b.label, "fr"))
+    .slice(0, limit);
+}
+
+function summarize(data) {
+  const range = selectedRange(availableFacts(data));
+  const facts = applyFilters(data, range);
+  const previous = previousRange(range);
+  const previousFacts = previous ? applyFilters(data, previous) : [];
+  const total = facts.reduce((sum, fact) => sum + factCount(fact), 0);
+  const previousTotal = previousFacts.reduce((sum, fact) => sum + factCount(fact), 0);
+
+  const stationCounter = new Map();
+  const routeCounter = new Map();
+  const typeCounter = new Map();
+  const slotCounter = new Map();
+
+  facts.forEach((fact) => {
+    const count = factCount(fact);
+    const departure = lookups.stations.get(fact.departure_station_id)?.name;
+    const arrival = lookups.stations.get(fact.arrival_station_id)?.name;
+    const route = lookups.routes.get(fact.route_id);
+    const type = lookups.trainTypes.get(fact.train_type_id)?.label || "Non précisé";
+    const slot = lookups.timeSlots.get(fact.time_slot_id)?.label || "Non précisé";
+
+    if (departure) stationCounter.set(departure, (stationCounter.get(departure) || 0) + count);
+    if (arrival && arrival !== departure) stationCounter.set(arrival, (stationCounter.get(arrival) || 0) + count);
+    if (route) routeCounter.set(route.route_id, (routeCounter.get(route.route_id) || 0) + count);
+    typeCounter.set(type, (typeCounter.get(type) || 0) + count);
+    slotCounter.set(slot, (slotCounter.get(slot) || 0) + count);
+  });
+
+  const stationRows = topItems(stationCounter);
+  const typeRows = topItems(typeCounter, 10);
+  const slotRows = [...lookups.timeSlots.values()]
+    .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0))
+    .filter((slot) => slot.label !== "Non precise")
+    .map((slot) => ({ label: slot.label, value: slotCounter.get(slot.label) || 0 }));
+  const routeRows = [...routeCounter.entries()]
+    .map(([routeId, value]) => {
+      const route = lookups.routes.get(routeId);
+      return {
+        departure: route?.departure || "",
+        arrival: route?.arrival || "",
+        main_type: mainTypeForRoute(facts, routeId),
+        cancellations: value
+      };
+    })
+    .sort((a, b) => b.cancellations - a.cancellations)
+    .slice(0, 10);
+  const topRoute = routeRows[0];
+
+  let evolutionLabel = "-";
+  let evolutionDetail = "Comparaison indisponible";
+  if (previousTotal > 0) {
+    const evolution = ((total - previousTotal) / previousTotal) * 100;
+    evolutionLabel = `${evolution >= 0 ? "+" : ""}${evolution.toFixed(1)}%`;
+    evolutionDetail = state.period === "1" ? "Vs jour précédent" : "Vs période précédente";
+  }
+
+  return {
+    range,
+    total,
+    period_label: periodLabel(range.start, range.end),
+    evolution_label: evolutionLabel,
+    evolution_detail: evolutionDetail,
+    top_station: stationRows[0] || { label: "-", value: 0 },
+    top_route: topRoute
+      ? { label: `${topRoute.departure} -> ${topRoute.arrival}`, value: topRoute.cancellations }
+      : { label: "-", value: 0 },
+    daily_evolution: completeDailySeries(facts, range),
+    top_stations: stationRows,
+    category_distribution: typeRows,
+    time_slot_distribution: slotRows,
+    top_routes: routeRows
+  };
+}
+
+function mainTypeForRoute(facts, routeId) {
+  const counter = new Map();
+  facts
+    .filter((fact) => fact.route_id === routeId)
+    .forEach((fact) => {
+      const label = lookups.trainTypes.get(fact.train_type_id)?.label || "Non précisé";
+      counter.set(label, (counter.get(label) || 0) + factCount(fact));
+    });
+  return topItems(counter, 1)[0]?.label || "Non précisé";
+}
+
+function renderKpis(data, summary) {
+  const { metadata } = data;
+  setText("[data-kpi='total']", numberFormat(summary.total));
+  setText("[data-kpi='period']", summary.period_label);
+  setText("[data-kpi='evolution']", summary.evolution_label);
+  setText("[data-kpi='evolution-detail']", summary.evolution_detail);
+  setText("[data-kpi='station']", summary.top_station.label);
+  setText("[data-kpi='station-count']", `${numberFormat(summary.top_station.value)} suppression(s)`);
+  setText("[data-kpi='route']", summary.top_route.label);
+  setText("[data-kpi='route-count']", `${numberFormat(summary.top_route.value)} suppression(s)`);
   setText("[data-kpi='updated']", metadata.update_label || "-");
-  setText(
-    "[data-kpi='quality']",
-    metadata.quality_ok ? "Données contrôlées" : "Contrôle à vérifier"
-  );
+  setText("[data-kpi='quality']", metadata.quality_ok ? "Données contrôlées" : "Contrôle à vérifier");
   setText(
     "[data-status='quality']",
     metadata.quality_ok
       ? `Contrôles qualité OK, ${numberFormat(metadata.rejected_row_count)} rejet`
       : "Contrôles qualité à vérifier"
   );
-  setText("[data-panel='daily-total']", `${numberFormat(kpis.total_cancellations)} suppression(s)`);
+  setText("[data-panel='daily-total']", `${numberFormat(summary.total)} suppression(s)`);
 }
 
-function renderLineChart(data) {
+function renderLineChart(rows) {
   const target = document.getElementById("daily-chart");
-  const values = data.charts.daily_evolution || [];
+  const values = rows || [];
   if (!target) return;
   if (!values.length) {
     target.innerHTML = '<div class="empty-state">Aucune donnée disponible.</div>';
@@ -103,13 +304,11 @@ function renderLineChart(data) {
   });
   const path = points.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
   const area = `${path} L ${points[points.length - 1].x} ${height - padding.bottom} L ${points[0].x} ${height - padding.bottom} Z`;
-  const labelEvery = Math.max(1, Math.ceil(points.length / 10));
+  const labelEvery = Math.max(1, Math.ceil(points.length / 9));
   const labels = points
     .map((point, index) => {
       if (index % labelEvery !== 0 && index !== points.length - 1) return "";
-      const date = new Date(`${point.date}T00:00:00`);
-      const label = date.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
-      return `<text class="axis-label" x="${point.x}" y="${height - 12}" text-anchor="middle">${label}</text>`;
+      return `<text class="axis-label" x="${point.x}" y="${height - 12}" text-anchor="middle">${compactDate(point.date)}</text>`;
     })
     .join("");
 
@@ -146,7 +345,7 @@ function renderBars(containerId, rows) {
       const width = Math.max(5, Math.round((item.value / maxValue) * 100));
       return `
         <div class="bar-row">
-          <span class="bar-label" title="${item.label}">${item.label}</span>
+          <span class="bar-label" title="${escapeHtml(item.label)}">${escapeHtml(item.label)}</span>
           <span class="bar-track"><span class="bar-fill" style="width: ${width}%"></span></span>
           <span class="bar-value">${numberFormat(item.value)}</span>
         </div>
@@ -179,7 +378,7 @@ function renderDonut(rows) {
       const color = magentaScale[index % magentaScale.length];
       return `
         <div class="legend-item">
-          <span><span style="color:${color}">●</span> ${item.label}</span>
+          <span><span style="color:${color}">●</span> ${escapeHtml(item.label)}</span>
           <strong>${numberFormat(item.value)}</strong>
         </div>
       `;
@@ -198,7 +397,7 @@ function renderSlots(rows) {
         <div class="slot">
           <div class="slot-bar" style="height: ${height}px"></div>
           <strong>${numberFormat(item.value)}</strong>
-          <span>${item.label}</span>
+          <span>${escapeHtml(item.label)}</span>
         </div>
       `;
     })
@@ -216,9 +415,9 @@ function renderRoutes(rows) {
     .map(
       (row) => `
         <tr>
-          <td>${row.departure}</td>
-          <td>${row.arrival}</td>
-          <td>${row.main_type}</td>
+          <td>${escapeHtml(row.departure)}</td>
+          <td>${escapeHtml(row.arrival)}</td>
+          <td>${escapeHtml(row.main_type)}</td>
           <td>${numberFormat(row.cancellations)}</td>
         </tr>
       `
@@ -226,13 +425,66 @@ function renderRoutes(rows) {
     .join("");
 }
 
-function renderDashboard(data) {
-  renderKpis(data);
-  renderLineChart(data);
-  renderBars("station-chart", data.charts.top_departure_stations || []);
-  renderDonut(data.charts.category_distribution || []);
-  renderSlots(data.charts.time_slot_distribution || []);
-  renderRoutes(data.tables.top_routes || []);
+function renderDashboard() {
+  const summary = summarize(dashboardData);
+  renderKpis(dashboardData, summary);
+  renderLineChart(summary.daily_evolution);
+  renderBars("station-chart", summary.top_stations);
+  renderDonut(summary.category_distribution);
+  renderSlots(summary.time_slot_distribution);
+  renderRoutes(summary.top_routes);
 }
 
-loadData().then(renderDashboard);
+function populateSelect(select, rows, valueKey, labelKey, emptyLabel) {
+  if (!select) return;
+  select.innerHTML = `<option value="">${emptyLabel}</option>`;
+  rows.forEach((row) => {
+    const option = document.createElement("option");
+    option.value = row[valueKey];
+    option.textContent = row[labelKey];
+    select.appendChild(option);
+  });
+}
+
+function setupControls(data) {
+  const dimensions = data.model?.dimensions || {};
+  populateSelect(
+    document.getElementById("station-filter"),
+    [...(dimensions.stations || [])].sort((a, b) => a.name.localeCompare(b.name, "fr")),
+    "station_id",
+    "name",
+    "Toutes"
+  );
+  populateSelect(
+    document.getElementById("train-type-filter"),
+    [...(dimensions.train_types || [])].sort((a, b) => a.label.localeCompare(b.label, "fr")),
+    "train_type_id",
+    "label",
+    "Tous"
+  );
+
+  document.querySelectorAll("[data-period]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.period = button.dataset.period || "30";
+      document.querySelectorAll("[data-period]").forEach((item) => item.classList.remove("active"));
+      button.classList.add("active");
+      renderDashboard();
+    });
+  });
+
+  document.getElementById("station-filter")?.addEventListener("change", (event) => {
+    state.stationId = event.target.value;
+    renderDashboard();
+  });
+  document.getElementById("train-type-filter")?.addEventListener("change", (event) => {
+    state.trainTypeId = event.target.value;
+    renderDashboard();
+  });
+}
+
+loadData().then((data) => {
+  dashboardData = data;
+  lookups = createLookups(data);
+  setupControls(data);
+  renderDashboard();
+});

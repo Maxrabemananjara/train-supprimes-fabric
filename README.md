@@ -7,7 +7,7 @@ L'objectif est de construire une chaine automatisee de traitement et de publicat
 - ingestion de donnees open data ;
 - organisation en architecture medaillon Bronze / Silver / Gold ;
 - traitement et controles qualite avec Microsoft Fabric ;
-- generation de fichiers Gold pour un site public ;
+- preparation d'un modele Gold faits / dimensions pour un site public ;
 - publication d'un dashboard via GitHub Pages.
 
 ## Architecture cible
@@ -16,7 +16,7 @@ L'objectif est de construire une chaine automatisee de traitement et de publicat
 data.gouv
   -> Bronze : fichiers bruts historises
   -> Silver : donnees nettoyees et controlees
-  -> Gold   : agregats et JSON pour le dashboard
+  -> Gold   : faits, dimensions, indicateurs et JSON pour le dashboard
   -> GitHub Pages : site public mis a jour quotidiennement
 ```
 
