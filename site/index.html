@@ -32,22 +32,26 @@
             <p class="subtitle">Lecture métier des suppressions publiées en open data.</p>
           </div>
           <div class="filters" aria-label="Filtres">
-            <button class="filter-pill" type="button" data-period="1">Dernier jour</button>
-            <button class="filter-pill" type="button" data-period="7">7 jours</button>
-            <button class="filter-pill active" type="button" data-period="30">30 jours</button>
-            <button class="filter-pill" type="button" data-period="all">Historique</button>
-            <label class="select-filter">
-              <span>Gare</span>
-              <select id="station-filter">
-                <option>Toutes</option>
-              </select>
-            </label>
-            <label class="select-filter">
-              <span>Type</span>
-              <select id="train-type-filter">
-                <option>Tous</option>
-              </select>
-            </label>
+            <div class="period-filter-group" aria-label="Période">
+              <button class="filter-pill" type="button" data-period="1">Dernier jour</button>
+              <button class="filter-pill" type="button" data-period="7">7 jours</button>
+              <button class="filter-pill active" type="button" data-period="30">30 jours</button>
+              <button class="filter-pill" type="button" data-period="all">Historique</button>
+            </div>
+            <div class="select-filter-group">
+              <label class="select-filter">
+                <span>Gare :</span>
+                <select id="station-filter">
+                  <option>Toutes</option>
+                </select>
+              </label>
+              <label class="select-filter">
+                <span>Type :</span>
+                <select id="train-type-filter">
+                  <option>Tous</option>
+                </select>
+              </label>
+            </div>
           </div>
         </header>
 

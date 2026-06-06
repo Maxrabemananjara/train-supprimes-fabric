@@ -86,14 +86,14 @@ select {
 }
 
 .page-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 24px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
   margin-bottom: 24px;
 }
 
-.page-header > div {
+.page-header > div:first-child {
+  grid-row: 2;
   min-width: 0;
 }
 
@@ -124,10 +124,22 @@ h1 {
 
 .filters {
   display: flex;
-  flex-wrap: wrap;
+  grid-row: 1;
+  flex-wrap: nowrap;
+  align-items: center;
   justify-content: flex-end;
+  gap: 12px 18px;
+  width: 100%;
+  min-width: 0;
+  padding-top: 2px;
+}
+
+.period-filter-group,
+.select-filter-group {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
   gap: 10px;
-  min-width: min(640px, 100%);
 }
 
 .filter-pill,
@@ -139,7 +151,8 @@ h1 {
 }
 
 .filter-pill {
-  padding: 0 20px;
+  min-width: 112px;
+  padding: 0 18px;
   color: var(--ink);
   cursor: pointer;
 }
@@ -154,11 +167,13 @@ h1 {
 .select-filter {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 12px;
+  gap: 12px;
+  min-width: 196px;
+  padding: 0 12px 0 14px;
 }
 
 .select-filter span {
+  flex: 0 0 auto;
   color: var(--accent);
   font-size: 0.78rem;
   font-weight: 800;
@@ -166,7 +181,8 @@ h1 {
 }
 
 .select-filter select {
-  min-width: 122px;
+  min-width: 0;
+  width: 100%;
   border: 0;
   outline: 0;
   background: transparent;
@@ -555,6 +571,11 @@ td:last-child {
     min-width: 0;
   }
 
+  .period-filter-group,
+  .select-filter-group {
+    flex-wrap: wrap;
+  }
+
   .kpi-grid,
   .content-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -585,7 +606,9 @@ td:last-child {
   }
 
   .filters {
-    flex-wrap: nowrap;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
     overflow-x: auto;
     padding-bottom: 4px;
     scrollbar-width: none;
@@ -598,6 +621,19 @@ td:last-child {
   .filter-pill,
   .select-filter {
     flex: 0 0 auto;
+  }
+
+  .period-filter-group,
+  .select-filter-group {
+    flex-wrap: nowrap;
+  }
+
+  .filter-pill {
+    min-width: 108px;
+  }
+
+  .select-filter {
+    min-width: 180px;
   }
 
   h1 {
