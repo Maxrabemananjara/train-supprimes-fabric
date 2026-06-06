@@ -418,8 +418,8 @@ h1 {
 
 .map-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 132px;
-  gap: 14px;
+  grid-template-columns: 1fr;
+  gap: 10px;
   align-items: center;
   min-height: 240px;
 }
@@ -427,22 +427,41 @@ h1 {
 .map-svg {
   display: block;
   width: 100%;
-  min-height: 230px;
+  height: 205px;
+  min-height: 0;
 }
 
-.map-shape {
-  fill: #fbf1f6;
-  stroke: #efcadb;
-  stroke-width: 2;
-}
-
-.map-shape.corsica {
-  fill: #fdf6f9;
-}
-
-.map-point circle {
+.map-region polygon {
   stroke: #fff;
-  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke: #fff;
+  stroke-width: 6;
+  filter: drop-shadow(0 8px 14px rgba(60, 38, 54, 0.08));
+}
+
+.map-region text {
+  fill: #fff;
+  font-size: 19px;
+  font-weight: 800;
+  pointer-events: none;
+}
+
+.map-region .map-value {
+  fill: rgba(255, 255, 255, 0.86);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.map-region polygon[fill="#f9e8f1"],
+.map-region polygon[fill="#f2a8cb"] {
+  stroke: #fff;
+}
+
+.map-region polygon[fill="#f9e8f1"] + text,
+.map-region polygon[fill="#f2a8cb"] + text,
+.map-region polygon[fill="#f9e8f1"] + text + .map-value,
+.map-region polygon[fill="#f2a8cb"] + text + .map-value {
+  fill: var(--accent-dark);
 }
 
 .map-legend {

@@ -69,40 +69,76 @@ const stationPositions = {
   "valenciennes": { lat: 50.3632, lon: 3.5175 },
   "wissembourg": { lat: 49.0371, lon: 7.9445 }
 };
-const franceBounds = { minLon: -5.5, maxLon: 9.7, minLat: 41.1, maxLat: 51.2 };
-const franceOutline = [
-  [-4.8, 48.4],
-  [-3.1, 48.9],
-  [-1.6, 49.6],
-  [1.8, 50.9],
-  [3.4, 50.5],
-  [5.8, 49.7],
-  [7.5, 48.4],
-  [7.9, 47.2],
-  [6.3, 46.1],
-  [7.4, 44.6],
-  [6.0, 43.1],
-  [4.7, 43.3],
-  [3.1, 42.7],
-  [1.4, 42.8],
-  [-0.4, 43.1],
-  [-1.6, 43.5],
-  [-1.8, 44.4],
-  [-1.2, 45.0],
-  [-1.4, 46.0],
-  [-2.2, 47.0],
-  [-4.1, 47.4],
-  [-4.8, 48.4]
+const regionTiles = [
+  { id: "HDF", label: "Hauts-de-France", short: "HDF", points: "170,18 226,18 246,48 222,80 166,76 146,45" },
+  { id: "NOR", label: "Normandie", short: "NOR", points: "84,55 145,42 166,78 148,112 82,108 58,78" },
+  { id: "IDF", label: "Île-de-France", short: "IDF", points: "160,91 215,88 232,119 210,150 158,145 138,116" },
+  { id: "GES", label: "Grand Est", short: "GES", points: "232,63 302,78 328,116 302,155 236,138 220,100" },
+  { id: "BRE", label: "Bretagne", short: "BRE", points: "24,92 72,82 100,111 74,149 22,141 4,112" },
+  { id: "PDL", label: "Pays de la Loire", short: "PDL", points: "76,125 143,120 158,162 126,198 64,181 50,146" },
+  { id: "CVL", label: "Centre-Val de Loire", short: "CVL", points: "145,143 213,148 230,187 196,225 130,204 116,166" },
+  { id: "BFC", label: "Bourgogne-Franche-Comté", short: "BFC", points: "228,151 300,165 318,207 280,242 214,220 198,181" },
+  { id: "NAQ", label: "Nouvelle-Aquitaine", short: "NAQ", points: "60,190 130,210 148,270 110,325 42,300 22,236" },
+  { id: "ARA", label: "Auvergne-Rhône-Alpes", short: "AURA", points: "160,226 238,228 274,278 240,338 164,326 134,270" },
+  { id: "OCC", label: "Occitanie", short: "OCC", points: "112,318 178,334 196,390 152,430 82,402 70,354" },
+  { id: "PAC", label: "Provence-Alpes-Côte d'Azur", short: "PACA", points: "222,332 286,320 332,360 314,414 244,404 206,368" },
+  { id: "COR", label: "Corse", short: "COR", points: "336,405 358,420 368,456 350,484 328,472 324,432" }
 ];
-const corsicaOutline = [
-  [8.6, 43.0],
-  [9.1, 42.8],
-  [9.4, 42.2],
-  [9.2, 41.5],
-  [8.8, 41.4],
-  [8.5, 42.2],
-  [8.6, 43.0]
-];
+const stationRegionOverrides = {
+  "abancourt": "HDF",
+  "abbeville": "HDF",
+  "agen": "NAQ",
+  "aigues mortes": "OCC",
+  "ailly sur noye": "HDF",
+  "amiens": "HDF",
+  "aurillac": "ARA",
+  "avignon centre": "PAC",
+  "bas monistrol": "ARA",
+  "bayonne": "NAQ",
+  "bedous": "NAQ",
+  "bidos": "NAQ",
+  "bordeaux saint jean": "NAQ",
+  "brioude": "ARA",
+  "brive la gaillarde": "NAQ",
+  "clermont ferrand": "ARA",
+  "dax": "NAQ",
+  "foix": "OCC",
+  "grenoble": "ARA",
+  "hendaye": "NAQ",
+  "hirson": "HDF",
+  "l arbresle": "ARA",
+  "le puy en velay": "ARA",
+  "lille flandres": "HDF",
+  "lyon part dieu": "ARA",
+  "lyon perrache": "ARA",
+  "lyon saint paul": "ARA",
+  "marseille saint charles": "PAC",
+  "nancy": "GES",
+  "nantes": "PDL",
+  "narbonne": "OCC",
+  "nimes centre": "OCC",
+  "oloron sainte marie": "NAQ",
+  "paris austerlitz": "IDF",
+  "paris gare de lyon": "IDF",
+  "paris montparnasse": "IDF",
+  "paris nord": "IDF",
+  "pau": "NAQ",
+  "perpignan": "OCC",
+  "pont saint esprit": "OCC",
+  "reims": "GES",
+  "rennes": "BRE",
+  "rodez": "OCC",
+  "saint etienne chateaucreux": "ARA",
+  "saint jean pied de port": "NAQ",
+  "saint quentin": "HDF",
+  "strasbourg": "GES",
+  "tarbes": "OCC",
+  "tergnier": "HDF",
+  "toulouse matabiau": "OCC",
+  "tours": "CVL",
+  "valenciennes": "HDF",
+  "wissembourg": "GES"
+};
 const state = {
   period: "30",
   stationId: "",
@@ -152,6 +188,29 @@ function stationPosition(label) {
   if (key.includes("saint etienne")) return stationPositions["saint etienne chateaucreux"];
 
   return null;
+}
+
+function stationRegion(label) {
+  const key = normalizeStationName(label);
+  if (stationRegionOverrides[key]) return stationRegionOverrides[key];
+  const position = stationPosition(label);
+  if (!position) return "";
+
+  const { lat, lon } = position;
+  if (lat >= 49.1 && lon >= 1) return "HDF";
+  if (lat >= 48 && lon <= -1.4) return "BRE";
+  if (lat >= 48 && lon < 1.4) return "NOR";
+  if (lat >= 48 && lon >= 6) return "GES";
+  if (lat >= 48 && lon >= 2 && lon < 6) return "IDF";
+  if (lat >= 46.3 && lon <= -0.6) return "PDL";
+  if (lat >= 46.2 && lon < 3.2) return "CVL";
+  if (lat >= 46.3 && lon >= 3.2 && lon < 6.5) return "BFC";
+  if (lat < 44.3 && lon >= 4.3) return "PAC";
+  if (lat < 44.3) return "OCC";
+  if (lat < 46.2 && lon < 1.5) return "NAQ";
+  if (lat < 46.6 && lon >= 1.5 && lon < 4.2) return "ARA";
+  if (lon >= 4.2 && lon < 7.5) return "ARA";
+  return "";
 }
 
 function parseDate(value) {
@@ -301,6 +360,7 @@ function summarize(data) {
   const previousTotal = previousFacts.reduce((sum, fact) => sum + factCount(fact), 0);
 
   const stationCounter = new Map();
+  const regionCounter = new Map();
   const routeCounter = new Map();
   const typeCounter = new Map();
   const slotCounter = new Map();
@@ -315,16 +375,21 @@ function summarize(data) {
 
     if (departure) stationCounter.set(departure, (stationCounter.get(departure) || 0) + count);
     if (arrival && arrival !== departure) stationCounter.set(arrival, (stationCounter.get(arrival) || 0) + count);
+    const departureRegion = stationRegion(departure);
+    const arrivalRegion = stationRegion(arrival);
+    if (departureRegion) regionCounter.set(departureRegion, (regionCounter.get(departureRegion) || 0) + count);
+    if (arrivalRegion && arrivalRegion !== departureRegion) {
+      regionCounter.set(arrivalRegion, (regionCounter.get(arrivalRegion) || 0) + count);
+    }
     if (route) routeCounter.set(route.route_id, (routeCounter.get(route.route_id) || 0) + count);
     typeCounter.set(type, (typeCounter.get(type) || 0) + count);
     slotCounter.set(slot, (slotCounter.get(slot) || 0) + count);
   });
 
   const stationRows = topItems(stationCounter);
-  const mapRows = topItems(stationCounter, 24)
-    .map((item) => ({ ...item, position: stationPosition(item.label) }))
-    .filter((item) => item.position)
-    .slice(0, 16);
+  const mapRows = regionTiles
+    .map((region) => ({ ...region, value: regionCounter.get(region.id) || 0 }))
+    .sort((a, b) => b.value - a.value || a.label.localeCompare(b.label, "fr"));
   const typeRows = topItems(typeCounter, 10);
   const slotRows = [...lookups.timeSlots.values()]
     .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0))
@@ -524,56 +589,50 @@ function renderSlots(rows) {
     .join("");
 }
 
-function projectFrancePoint(position) {
-  const width = 360;
-  const height = 300;
-  const x = ((position.lon - franceBounds.minLon) / (franceBounds.maxLon - franceBounds.minLon)) * width;
-  const y = ((franceBounds.maxLat - position.lat) / (franceBounds.maxLat - franceBounds.minLat)) * height;
-  return { x: Math.round(x), y: Math.round(y) };
-}
-
-function outlinePoints(points) {
-  return points
-    .map(([lon, lat]) => {
-      const point = projectFrancePoint({ lon, lat });
-      return `${point.x},${point.y}`;
-    })
-    .join(" ");
-}
-
 function mapColor(value, maxValue) {
   const ratio = maxValue ? value / maxValue : 0;
   if (ratio >= 0.75) return "#d0005f";
   if (ratio >= 0.45) return "#b00062";
   if (ratio >= 0.2) return "#ed6fa4";
-  return "#f2a8cb";
+  if (value > 0) return "#f2a8cb";
+  return "#f9e8f1";
+}
+
+function polygonCenter(points) {
+  const coordinates = points.split(" ").map((point) => point.split(",").map(Number));
+  const sums = coordinates.reduce(
+    (acc, point) => ({ x: acc.x + point[0], y: acc.y + point[1] }),
+    { x: 0, y: 0 }
+  );
+  return { x: sums.x / coordinates.length, y: sums.y / coordinates.length };
 }
 
 function renderFranceMap(rows) {
   const target = document.getElementById("france-map");
   if (!target) return;
-  if (!rows.length) {
+  const maxValue = Math.max(...rows.map((item) => item.value), 0);
+  if (!rows.length || !maxValue) {
     target.innerHTML = '<div class="empty-state">Carte indisponible pour cette sélection.</div>';
     return;
   }
 
-  const maxValue = Math.max(...rows.map((item) => item.value), 1);
-  const bubbles = rows
-    .map((item, index) => {
-      const point = projectFrancePoint(item.position);
-      const ratio = item.value / maxValue;
-      const radius = Math.round(7 + Math.sqrt(ratio) * 16);
+  const tiles = regionTiles
+    .map((region) => {
+      const item = rows.find((row) => row.id === region.id) || { value: 0 };
+      const center = polygonCenter(region.points);
       const color = mapColor(item.value, maxValue);
       return `
-        <g class="map-point">
-          <circle cx="${point.x}" cy="${point.y}" r="${radius + 4}" fill="${color}" opacity="0.16"></circle>
-          <circle cx="${point.x}" cy="${point.y}" r="${radius}" fill="${color}" opacity="0.88"></circle>
-          <title>${escapeHtml(item.label)} : ${numberFormat(item.value)} suppression(s)</title>
+        <g class="map-region">
+          <polygon points="${region.points}" fill="${color}"></polygon>
+          <text x="${center.x}" y="${center.y - 4}" text-anchor="middle">${escapeHtml(region.short)}</text>
+          <text class="map-value" x="${center.x}" y="${center.y + 12}" text-anchor="middle">${numberFormat(item.value)}</text>
+          <title>${escapeHtml(region.label)} : ${numberFormat(item.value)} suppression(s)</title>
         </g>
       `;
     })
     .join("");
   const legendRows = rows
+    .filter((item) => item.value > 0)
     .slice(0, 3)
     .map(
       (item) => `
@@ -587,10 +646,8 @@ function renderFranceMap(rows) {
 
   target.innerHTML = `
     <div class="map-layout">
-      <svg class="map-svg" viewBox="0 0 360 300" role="img">
-        <polygon class="map-shape" points="${outlinePoints(franceOutline)}"></polygon>
-        <polygon class="map-shape corsica" points="${outlinePoints(corsicaOutline)}"></polygon>
-        ${bubbles}
+      <svg class="map-svg" viewBox="0 0 374 492" role="img">
+        ${tiles}
       </svg>
       <div class="map-legend">
         <div class="map-scale">
