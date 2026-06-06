@@ -408,6 +408,82 @@ h1 {
   font-size: 0.78rem;
 }
 
+.map-panel {
+  overflow: hidden;
+}
+
+.france-map {
+  min-height: 230px;
+}
+
+.map-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 132px;
+  gap: 14px;
+  align-items: center;
+  min-height: 240px;
+}
+
+.map-svg {
+  display: block;
+  width: 100%;
+  min-height: 230px;
+}
+
+.map-shape {
+  fill: #fbf1f6;
+  stroke: #efcadb;
+  stroke-width: 2;
+}
+
+.map-shape.corsica {
+  fill: #fdf6f9;
+}
+
+.map-point circle {
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.map-legend {
+  display: grid;
+  gap: 10px;
+  align-content: center;
+}
+
+.map-scale {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.map-scale-bar {
+  height: 10px;
+  background: linear-gradient(90deg, #f2a8cb, #ed6fa4, #b00062, #d0005f);
+  border-radius: 999px;
+}
+
+.map-legend-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.82rem;
+}
+
+.map-legend-row span {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.map-legend-row strong {
+  color: var(--ink);
+}
+
 .table-panel {
   min-height: 0;
   margin-top: 14px;
@@ -529,5 +605,13 @@ td:last-child {
 
   .mini-bars {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .map-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .map-legend {
+    grid-template-columns: 1fr;
   }
 }

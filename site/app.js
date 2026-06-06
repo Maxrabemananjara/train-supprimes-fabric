@@ -17,6 +17,92 @@ const fallbackData = {
 };
 
 const magentaScale = ["#d0005f", "#a00065", "#ed6fa4", "#f2a8cb", "#f7c7dc", "#6f2254"];
+const stationPositions = {
+  "abancourt": { lat: 49.6903, lon: 1.7744 },
+  "agen": { lat: 44.2031, lon: 0.6206 },
+  "amiens": { lat: 49.8902, lon: 2.3089 },
+  "aurillac": { lat: 44.9309, lon: 2.4446 },
+  "avignon centre": { lat: 43.9419, lon: 4.8053 },
+  "bas monistrol": { lat: 45.2904, lon: 4.1396 },
+  "bayonne": { lat: 43.4969, lon: -1.4706 },
+  "bedous": { lat: 42.9983, lon: -0.6031 },
+  "bidos": { lat: 43.1799, lon: -0.6072 },
+  "bordeaux saint jean": { lat: 44.8259, lon: -0.5567 },
+  "brioude": { lat: 45.2945, lon: 3.3841 },
+  "brive la gaillarde": { lat: 45.1508, lon: 1.528 },
+  "clermont ferrand": { lat: 45.7786, lon: 3.1007 },
+  "dax": { lat: 43.7205, lon: -1.0507 },
+  "foix": { lat: 42.9653, lon: 1.6078 },
+  "grenoble": { lat: 45.1915, lon: 5.7145 },
+  "hendaye": { lat: 43.352, lon: -1.7811 },
+  "hirson": { lat: 49.9221, lon: 4.0837 },
+  "l arbresle": { lat: 45.8334, lon: 4.6167 },
+  "le puy en velay": { lat: 45.0437, lon: 3.8852 },
+  "lille flandres": { lat: 50.6362, lon: 3.0718 },
+  "lyon part dieu": { lat: 45.7606, lon: 4.8594 },
+  "lyon perrache": { lat: 45.7485, lon: 4.8257 },
+  "lyon saint paul": { lat: 45.7665, lon: 4.8278 },
+  "marseille saint charles": { lat: 43.3027, lon: 5.3806 },
+  "nancy": { lat: 48.6898, lon: 6.1745 },
+  "nantes": { lat: 47.2173, lon: -1.5428 },
+  "narbonne": { lat: 43.1911, lon: 3.0056 },
+  "nimes centre": { lat: 43.8322, lon: 4.3653 },
+  "oloron sainte marie": { lat: 43.1948, lon: -0.6063 },
+  "paris austerlitz": { lat: 48.8423, lon: 2.3658 },
+  "paris gare de lyon": { lat: 48.8443, lon: 2.3744 },
+  "paris montparnasse": { lat: 48.8412, lon: 2.3205 },
+  "paris nord": { lat: 48.8809, lon: 2.3553 },
+  "pau": { lat: 43.2911, lon: -0.3698 },
+  "perpignan": { lat: 42.6964, lon: 2.8796 },
+  "pont saint esprit": { lat: 44.254, lon: 4.647 },
+  "reims": { lat: 49.2594, lon: 4.0242 },
+  "rennes": { lat: 48.1035, lon: -1.6722 },
+  "rodez": { lat: 44.3626, lon: 2.5802 },
+  "saint etienne chateaucreux": { lat: 45.4436, lon: 4.3993 },
+  "saint jean pied de port": { lat: 43.1636, lon: -1.2389 },
+  "saint quentin": { lat: 49.8471, lon: 3.2874 },
+  "strasbourg": { lat: 48.5851, lon: 7.7349 },
+  "tarbes": { lat: 43.2397, lon: 0.0694 },
+  "tergnier": { lat: 49.6575, lon: 3.2974 },
+  "toulouse matabiau": { lat: 43.6112, lon: 1.4539 },
+  "tours": { lat: 47.3898, lon: 0.6939 },
+  "valenciennes": { lat: 50.3632, lon: 3.5175 },
+  "wissembourg": { lat: 49.0371, lon: 7.9445 }
+};
+const franceBounds = { minLon: -5.5, maxLon: 9.7, minLat: 41.1, maxLat: 51.2 };
+const franceOutline = [
+  [-4.8, 48.4],
+  [-3.1, 48.9],
+  [-1.6, 49.6],
+  [1.8, 50.9],
+  [3.4, 50.5],
+  [5.8, 49.7],
+  [7.5, 48.4],
+  [7.9, 47.2],
+  [6.3, 46.1],
+  [7.4, 44.6],
+  [6.0, 43.1],
+  [4.7, 43.3],
+  [3.1, 42.7],
+  [1.4, 42.8],
+  [-0.4, 43.1],
+  [-1.6, 43.5],
+  [-1.8, 44.4],
+  [-1.2, 45.0],
+  [-1.4, 46.0],
+  [-2.2, 47.0],
+  [-4.1, 47.4],
+  [-4.8, 48.4]
+];
+const corsicaOutline = [
+  [8.6, 43.0],
+  [9.1, 42.8],
+  [9.4, 42.2],
+  [9.2, 41.5],
+  [8.8, 41.4],
+  [8.5, 42.2],
+  [8.6, 43.0]
+];
 const state = {
   period: "30",
   stationId: "",
@@ -37,6 +123,35 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function normalizeStationName(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/['’]/g, " ")
+    .replace(/&/g, " ")
+    .replace(/[^a-zA-Z0-9]+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+function stationPosition(label) {
+  const key = normalizeStationName(label);
+  if (stationPositions[key]) return stationPositions[key];
+
+  if (key.includes("montparnasse")) return stationPositions["paris montparnasse"];
+  if (key.includes("austerlitz")) return stationPositions["paris austerlitz"];
+  if (key.includes("paris nord")) return stationPositions["paris nord"];
+  if (key.includes("gare de lyon")) return stationPositions["paris gare de lyon"];
+  if (key.includes("marseille") && key.includes("saint charles")) return stationPositions["marseille saint charles"];
+  if (key.includes("bordeaux") && key.includes("saint jean")) return stationPositions["bordeaux saint jean"];
+  if (key.includes("lyon") && key.includes("part dieu")) return stationPositions["lyon part dieu"];
+  if (key.includes("lyon") && key.includes("perrache")) return stationPositions["lyon perrache"];
+  if (key.includes("nimes")) return stationPositions["nimes centre"];
+  if (key.includes("saint etienne")) return stationPositions["saint etienne chateaucreux"];
+
+  return null;
 }
 
 function parseDate(value) {
@@ -206,6 +321,10 @@ function summarize(data) {
   });
 
   const stationRows = topItems(stationCounter);
+  const mapRows = topItems(stationCounter, 24)
+    .map((item) => ({ ...item, position: stationPosition(item.label) }))
+    .filter((item) => item.position)
+    .slice(0, 16);
   const typeRows = topItems(typeCounter, 10);
   const slotRows = [...lookups.timeSlots.values()]
     .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0))
@@ -245,6 +364,7 @@ function summarize(data) {
       : { label: "-", value: 0 },
     daily_evolution: completeDailySeries(facts, range),
     top_stations: stationRows,
+    map_stations: mapRows,
     category_distribution: typeRows,
     time_slot_distribution: slotRows,
     top_routes: routeRows
@@ -404,6 +524,86 @@ function renderSlots(rows) {
     .join("");
 }
 
+function projectFrancePoint(position) {
+  const width = 360;
+  const height = 300;
+  const x = ((position.lon - franceBounds.minLon) / (franceBounds.maxLon - franceBounds.minLon)) * width;
+  const y = ((franceBounds.maxLat - position.lat) / (franceBounds.maxLat - franceBounds.minLat)) * height;
+  return { x: Math.round(x), y: Math.round(y) };
+}
+
+function outlinePoints(points) {
+  return points
+    .map(([lon, lat]) => {
+      const point = projectFrancePoint({ lon, lat });
+      return `${point.x},${point.y}`;
+    })
+    .join(" ");
+}
+
+function mapColor(value, maxValue) {
+  const ratio = maxValue ? value / maxValue : 0;
+  if (ratio >= 0.75) return "#d0005f";
+  if (ratio >= 0.45) return "#b00062";
+  if (ratio >= 0.2) return "#ed6fa4";
+  return "#f2a8cb";
+}
+
+function renderFranceMap(rows) {
+  const target = document.getElementById("france-map");
+  if (!target) return;
+  if (!rows.length) {
+    target.innerHTML = '<div class="empty-state">Carte indisponible pour cette sélection.</div>';
+    return;
+  }
+
+  const maxValue = Math.max(...rows.map((item) => item.value), 1);
+  const bubbles = rows
+    .map((item, index) => {
+      const point = projectFrancePoint(item.position);
+      const ratio = item.value / maxValue;
+      const radius = Math.round(7 + Math.sqrt(ratio) * 16);
+      const color = mapColor(item.value, maxValue);
+      return `
+        <g class="map-point">
+          <circle cx="${point.x}" cy="${point.y}" r="${radius + 4}" fill="${color}" opacity="0.16"></circle>
+          <circle cx="${point.x}" cy="${point.y}" r="${radius}" fill="${color}" opacity="0.88"></circle>
+          <title>${escapeHtml(item.label)} : ${numberFormat(item.value)} suppression(s)</title>
+        </g>
+      `;
+    })
+    .join("");
+  const legendRows = rows
+    .slice(0, 3)
+    .map(
+      (item) => `
+        <div class="map-legend-row">
+          <span>${escapeHtml(item.label)}</span>
+          <strong>${numberFormat(item.value)}</strong>
+        </div>
+      `
+    )
+    .join("");
+
+  target.innerHTML = `
+    <div class="map-layout">
+      <svg class="map-svg" viewBox="0 0 360 300" role="img">
+        <polygon class="map-shape" points="${outlinePoints(franceOutline)}"></polygon>
+        <polygon class="map-shape corsica" points="${outlinePoints(corsicaOutline)}"></polygon>
+        ${bubbles}
+      </svg>
+      <div class="map-legend">
+        <div class="map-scale">
+          <span>Faible</span>
+          <span>Fort</span>
+        </div>
+        <div class="map-scale-bar"></div>
+        ${legendRows}
+      </div>
+    </div>
+  `;
+}
+
 function renderRoutes(rows) {
   const target = document.getElementById("routes-table");
   if (!target) return;
@@ -432,6 +632,7 @@ function renderDashboard() {
   renderBars("station-chart", summary.top_stations);
   renderDonut(summary.category_distribution);
   renderSlots(summary.time_slot_distribution);
+  renderFranceMap(summary.map_stations);
   renderRoutes(summary.top_routes);
 }
 
