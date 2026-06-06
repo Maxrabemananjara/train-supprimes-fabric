@@ -180,7 +180,8 @@ h1 {
   text-transform: uppercase;
 }
 
-.select-filter select {
+.select-filter select,
+.select-filter input {
   min-width: 0;
   width: 100%;
   border: 0;
@@ -424,101 +425,6 @@ h1 {
   font-size: 0.78rem;
 }
 
-.map-panel {
-  overflow: hidden;
-}
-
-.france-map {
-  min-height: 230px;
-}
-
-.map-layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-  align-items: center;
-  min-height: 240px;
-}
-
-.map-svg {
-  display: block;
-  width: 100%;
-  height: 205px;
-  min-height: 0;
-}
-
-.map-region polygon {
-  stroke: #fff;
-  stroke-linejoin: round;
-  stroke: #fff;
-  stroke-width: 6;
-  filter: drop-shadow(0 8px 14px rgba(60, 38, 54, 0.08));
-}
-
-.map-region text {
-  fill: #fff;
-  font-size: 19px;
-  font-weight: 800;
-  pointer-events: none;
-}
-
-.map-region .map-value {
-  fill: rgba(255, 255, 255, 0.86);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.map-region polygon[fill="#f9e8f1"],
-.map-region polygon[fill="#f2a8cb"] {
-  stroke: #fff;
-}
-
-.map-region polygon[fill="#f9e8f1"] + text,
-.map-region polygon[fill="#f2a8cb"] + text,
-.map-region polygon[fill="#f9e8f1"] + text + .map-value,
-.map-region polygon[fill="#f2a8cb"] + text + .map-value {
-  fill: var(--accent-dark);
-}
-
-.map-legend {
-  display: grid;
-  gap: 10px;
-  align-content: center;
-}
-
-.map-scale {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 0.76rem;
-}
-
-.map-scale-bar {
-  height: 10px;
-  background: linear-gradient(90deg, #f2a8cb, #ed6fa4, #b00062, #d0005f);
-  border-radius: 999px;
-}
-
-.map-legend-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: 0.82rem;
-}
-
-.map-legend-row span {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--muted);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.map-legend-row strong {
-  color: var(--ink);
-}
-
 .table-panel {
   min-height: 0;
   margin-top: 14px;
@@ -662,11 +568,4 @@ td:last-child {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .map-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .map-legend {
-    grid-template-columns: 1fr;
-  }
 }

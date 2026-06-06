@@ -32,13 +32,15 @@
             <p class="subtitle">Lecture métier des suppressions publiées en open data.</p>
           </div>
           <div class="filters" aria-label="Filtres">
-            <div class="period-filter-group" aria-label="Période">
-              <button class="filter-pill" type="button" data-period="1">Dernier jour</button>
-              <button class="filter-pill" type="button" data-period="7">7 jours</button>
-              <button class="filter-pill active" type="button" data-period="30">30 jours</button>
-              <button class="filter-pill" type="button" data-period="all">Historique</button>
-            </div>
             <div class="select-filter-group">
+              <label class="select-filter">
+                <span>Du :</span>
+                <input id="start-date-filter" type="date" />
+              </label>
+              <label class="select-filter">
+                <span>Au :</span>
+                <input id="end-date-filter" type="date" />
+              </label>
               <label class="select-filter">
                 <span>Gare :</span>
                 <select id="station-filter">
@@ -66,7 +68,7 @@
             <div class="kpi-icon">↗</div>
             <p>Évolution</p>
             <strong data-kpi="evolution">-</strong>
-            <span data-kpi="evolution-detail">Comparaison disponible après historique.</span>
+            <span data-kpi="evolution-detail">Comparaison disponible selon la période.</span>
           </article>
           <article class="kpi-card">
             <div class="kpi-icon">⌖</div>
@@ -122,20 +124,12 @@
             </div>
           </article>
 
-          <article class="panel">
+          <article class="panel panel-large">
             <div class="panel-header">
               <h2>Tranches horaires</h2>
               <span>Départs</span>
             </div>
             <div id="slot-chart" class="mini-bars"></div>
-          </article>
-
-          <article class="panel map-panel">
-            <div class="panel-header">
-              <h2>Carte des suppressions</h2>
-              <span>Par zone</span>
-            </div>
-            <div id="france-map" class="france-map" aria-label="Carte des suppressions par gare"></div>
           </article>
         </section>
 

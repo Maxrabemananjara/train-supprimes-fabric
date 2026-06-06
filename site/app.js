@@ -140,7 +140,8 @@ const stationRegionOverrides = {
   "wissembourg": "GES"
 };
 const state = {
-  period: "30",
+  startDate: "",
+  endDate: "",
   stationId: "",
   trainTypeId: ""
 };
@@ -280,45 +281,67 @@ function factCount(fact) {
   return Number(fact.cancellations || 0);
 }
 
-function dateBounds(facts) {
-  const dates = facts.map((fact) => fact.date_id).filter(Boolean).sort();
+function dateRows(data) {
+  return [...(data.model?.dimensions?.dates || [])].sort((a, b) => a.date_id.localeCompare(b.date_id));
+}
+
+function firstDateRow(data) {
+  return dateRows(data)[0] || null;
+}
+
+function latestDateRow(data) {
+  return dateRows(data).at(-1) || null;
+}
+
+function currentRange(data) {
+  const first = firstDateRow(data)?.date_id || "";
+  const latest = latestDateRow(data)?.date_id || "";
+  let start = state.startDate || first;
+  let end = state.endDate || latest;
+
+  if (start && end && start > end) {
+    [start, end] = [end, start];
+  }
+
+  if (!start || !end) return { start: "", end: "", days: 0 };
+
   return {
-    first: dates[0] || "",
-    latest: dates[dates.length - 1] || ""
+    start,
+    end,
+    days: Math.max(1, Math.round((parseDate(end) - parseDate(start)) / 86400000) + 1)
   };
 }
 
-function selectedRange(facts) {
-  const bounds = dateBounds(facts);
-  if (!bounds.latest) return { start: "", end: "", days: 0 };
-  if (state.period === "all") {
-    return {
-      start: bounds.first,
-      end: bounds.latest,
-      days: Math.max(1, Math.round((parseDate(bounds.latest) - parseDate(bounds.first)) / 86400000) + 1)
-    };
-  }
-
-  const days = Number(state.period);
-  const start = dateKey(addDays(parseDate(bounds.latest), -(days - 1)));
-  return { start, end: bounds.latest, days };
+function selectedDateRows(data) {
+  const range = currentRange(data);
+  return dateRows(data).filter((row) => row.date_id >= range.start && row.date_id <= range.end);
 }
 
-function previousRange(range) {
-  if (!range.start || !range.end || state.period === "all") return null;
+function dateSet(rows) {
+  return new Set(rows.map((row) => row.date_id));
+}
+
+function rangeFromDates(rows) {
+  if (!rows.length) return { start: "", end: "", days: 0 };
+  const start = rows[0].date_id;
+  const end = rows[rows.length - 1].date_id;
+  return {
+    start,
+    end,
+    days: Math.max(1, Math.round((parseDate(end) - parseDate(start)) / 86400000) + 1)
+  };
+}
+
+function previousSelectionRows(data, range) {
+  if (!range.start || !range.end || !range.days) return [];
   const previousEnd = dateKey(addDays(parseDate(range.start), -1));
-  const previousStart = dateKey(addDays(parseDate(previousEnd), -(range.days - 1)));
-  return { start: previousStart, end: previousEnd, days: range.days };
+  const previousStart = dateKey(addDays(parseDate(previousEnd), 1 - range.days));
+  return dateRows(data).filter((row) => row.date_id >= previousStart && row.date_id <= previousEnd);
 }
 
-function inRange(fact, range) {
-  if (!range?.start || !range?.end) return false;
-  return fact.date_id >= range.start && fact.date_id <= range.end;
-}
-
-function applyFilters(data, range) {
+function applyFilters(data, dates) {
   return availableFacts(data).filter((fact) => {
-    if (!inRange(fact, range)) return false;
+    if (!dates.has(fact.date_id)) return false;
     if (state.trainTypeId && fact.train_type_id !== state.trainTypeId) return false;
     if (
       state.stationId &&
@@ -352,15 +375,13 @@ function topItems(counter, limit = 8) {
 }
 
 function summarize(data) {
-  const range = selectedRange(availableFacts(data));
-  const facts = applyFilters(data, range);
-  const previous = previousRange(range);
-  const previousFacts = previous ? applyFilters(data, previous) : [];
+  const range = currentRange(data);
+  const facts = applyFilters(data, dateSet(selectedDateRows(data)));
+  const previousFacts = applyFilters(data, dateSet(previousSelectionRows(data, range)));
   const total = facts.reduce((sum, fact) => sum + factCount(fact), 0);
   const previousTotal = previousFacts.reduce((sum, fact) => sum + factCount(fact), 0);
 
   const stationCounter = new Map();
-  const regionCounter = new Map();
   const routeCounter = new Map();
   const typeCounter = new Map();
   const slotCounter = new Map();
@@ -375,21 +396,12 @@ function summarize(data) {
 
     if (departure) stationCounter.set(departure, (stationCounter.get(departure) || 0) + count);
     if (arrival && arrival !== departure) stationCounter.set(arrival, (stationCounter.get(arrival) || 0) + count);
-    const departureRegion = stationRegion(departure);
-    const arrivalRegion = stationRegion(arrival);
-    if (departureRegion) regionCounter.set(departureRegion, (regionCounter.get(departureRegion) || 0) + count);
-    if (arrivalRegion && arrivalRegion !== departureRegion) {
-      regionCounter.set(arrivalRegion, (regionCounter.get(arrivalRegion) || 0) + count);
-    }
     if (route) routeCounter.set(route.route_id, (routeCounter.get(route.route_id) || 0) + count);
     typeCounter.set(type, (typeCounter.get(type) || 0) + count);
     slotCounter.set(slot, (slotCounter.get(slot) || 0) + count);
   });
 
   const stationRows = topItems(stationCounter);
-  const mapRows = regionTiles
-    .map((region) => ({ ...region, value: regionCounter.get(region.id) || 0 }))
-    .sort((a, b) => b.value - a.value || a.label.localeCompare(b.label, "fr"));
   const typeRows = topItems(typeCounter, 10);
   const slotRows = [...lookups.timeSlots.values()]
     .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0))
@@ -414,7 +426,7 @@ function summarize(data) {
   if (previousTotal > 0) {
     const evolution = ((total - previousTotal) / previousTotal) * 100;
     evolutionLabel = `${evolution >= 0 ? "+" : ""}${evolution.toFixed(1)}%`;
-    evolutionDetail = state.period === "1" ? "Vs jour précédent" : "Vs période précédente";
+    evolutionDetail = range.days === 1 ? "Vs jour précédent" : "Vs période précédente";
   }
 
   return {
@@ -429,7 +441,6 @@ function summarize(data) {
       : { label: "-", value: 0 },
     daily_evolution: completeDailySeries(facts, range),
     top_stations: stationRows,
-    map_stations: mapRows,
     category_distribution: typeRows,
     time_slot_distribution: slotRows,
     top_routes: routeRows
@@ -589,78 +600,6 @@ function renderSlots(rows) {
     .join("");
 }
 
-function mapColor(value, maxValue) {
-  const ratio = maxValue ? value / maxValue : 0;
-  if (ratio >= 0.75) return "#d0005f";
-  if (ratio >= 0.45) return "#b00062";
-  if (ratio >= 0.2) return "#ed6fa4";
-  if (value > 0) return "#f2a8cb";
-  return "#f9e8f1";
-}
-
-function polygonCenter(points) {
-  const coordinates = points.split(" ").map((point) => point.split(",").map(Number));
-  const sums = coordinates.reduce(
-    (acc, point) => ({ x: acc.x + point[0], y: acc.y + point[1] }),
-    { x: 0, y: 0 }
-  );
-  return { x: sums.x / coordinates.length, y: sums.y / coordinates.length };
-}
-
-function renderFranceMap(rows) {
-  const target = document.getElementById("france-map");
-  if (!target) return;
-  const maxValue = Math.max(...rows.map((item) => item.value), 0);
-  if (!rows.length || !maxValue) {
-    target.innerHTML = '<div class="empty-state">Carte indisponible pour cette sélection.</div>';
-    return;
-  }
-
-  const tiles = regionTiles
-    .map((region) => {
-      const item = rows.find((row) => row.id === region.id) || { value: 0 };
-      const center = polygonCenter(region.points);
-      const color = mapColor(item.value, maxValue);
-      return `
-        <g class="map-region">
-          <polygon points="${region.points}" fill="${color}"></polygon>
-          <text x="${center.x}" y="${center.y - 4}" text-anchor="middle">${escapeHtml(region.short)}</text>
-          <text class="map-value" x="${center.x}" y="${center.y + 12}" text-anchor="middle">${numberFormat(item.value)}</text>
-          <title>${escapeHtml(region.label)} : ${numberFormat(item.value)} suppression(s)</title>
-        </g>
-      `;
-    })
-    .join("");
-  const legendRows = rows
-    .filter((item) => item.value > 0)
-    .slice(0, 3)
-    .map(
-      (item) => `
-        <div class="map-legend-row">
-          <span>${escapeHtml(item.label)}</span>
-          <strong>${numberFormat(item.value)}</strong>
-        </div>
-      `
-    )
-    .join("");
-
-  target.innerHTML = `
-    <div class="map-layout">
-      <svg class="map-svg" viewBox="0 0 374 492" role="img">
-        ${tiles}
-      </svg>
-      <div class="map-legend">
-        <div class="map-scale">
-          <span>Faible</span>
-          <span>Fort</span>
-        </div>
-        <div class="map-scale-bar"></div>
-        ${legendRows}
-      </div>
-    </div>
-  `;
-}
-
 function renderRoutes(rows) {
   const target = document.getElementById("routes-table");
   if (!target) return;
@@ -689,7 +628,6 @@ function renderDashboard() {
   renderBars("station-chart", summary.top_stations);
   renderDonut(summary.category_distribution);
   renderSlots(summary.time_slot_distribution);
-  renderFranceMap(summary.map_stations);
   renderRoutes(summary.top_routes);
 }
 
@@ -704,8 +642,46 @@ function populateSelect(select, rows, valueKey, labelKey, emptyLabel) {
   });
 }
 
+function setupDateControls(data) {
+  const startInput = document.getElementById("start-date-filter");
+  const endInput = document.getElementById("end-date-filter");
+  const first = firstDateRow(data)?.date_id || "";
+  const latest = latestDateRow(data)?.date_id || "";
+  if (!startInput || !endInput || !first || !latest) return;
+
+  const defaultStart = dateKey(addDays(parseDate(latest), -29));
+  state.startDate = defaultStart < first ? first : defaultStart;
+  state.endDate = latest;
+
+  [startInput, endInput].forEach((input) => {
+    input.min = first;
+    input.max = latest;
+  });
+  startInput.value = state.startDate;
+  endInput.value = state.endDate;
+
+  startInput.addEventListener("change", (event) => {
+    state.startDate = event.target.value || first;
+    if (state.endDate && state.startDate > state.endDate) {
+      state.endDate = state.startDate;
+      endInput.value = state.endDate;
+    }
+    renderDashboard();
+  });
+
+  endInput.addEventListener("change", (event) => {
+    state.endDate = event.target.value || latest;
+    if (state.startDate && state.endDate < state.startDate) {
+      state.startDate = state.endDate;
+      startInput.value = state.startDate;
+    }
+    renderDashboard();
+  });
+}
+
 function setupControls(data) {
   const dimensions = data.model?.dimensions || {};
+  setupDateControls(data);
   populateSelect(
     document.getElementById("station-filter"),
     [...(dimensions.stations || [])].sort((a, b) => a.name.localeCompare(b.name, "fr")),
@@ -720,15 +696,6 @@ function setupControls(data) {
     "label",
     "Tous"
   );
-
-  document.querySelectorAll("[data-period]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.period = button.dataset.period || "30";
-      document.querySelectorAll("[data-period]").forEach((item) => item.classList.remove("active"));
-      button.classList.add("active");
-      renderDashboard();
-    });
-  });
 
   document.getElementById("station-filter")?.addEventListener("change", (event) => {
     state.stationId = event.target.value;
