@@ -8,46 +8,30 @@
   </head>
   <body>
     <div class="app-shell">
-      <aside class="sidebar" aria-label="Navigation">
-        <div class="brand-mark">SNCF</div>
-        <button class="nav-button active" type="button" title="Vue globale" aria-label="Vue globale">
-          <span>⌂</span>
-        </button>
-        <button class="nav-button" type="button" title="Gares" aria-label="Gares">
-          <span>⌖</span>
-        </button>
-        <button class="nav-button" type="button" title="Liaisons" aria-label="Liaisons">
-          <span>↔</span>
-        </button>
-        <button class="nav-button" type="button" title="Qualité" aria-label="Qualité">
-          <span>✓</span>
-        </button>
-      </aside>
-
       <main class="dashboard">
         <header class="page-header">
           <div>
             <p class="eyebrow">Suivi quotidien</p>
             <h1>Trains supprimés</h1>
-            <p class="subtitle">Lecture métier des suppressions publiées en open data.</p>
+            <p class="subtitle">Source : data.gouv.fr</p>
           </div>
           <div class="filters" aria-label="Filtres">
             <div class="select-filter-group">
-              <label class="select-filter">
+              <label class="select-filter filter-date">
                 <span>Du :</span>
                 <input id="start-date-filter" type="date" />
               </label>
-              <label class="select-filter">
+              <label class="select-filter filter-date">
                 <span>Au :</span>
                 <input id="end-date-filter" type="date" />
               </label>
-              <label class="select-filter">
+              <label class="select-filter filter-station">
                 <span>Gare :</span>
                 <select id="station-filter">
                   <option>Toutes</option>
                 </select>
               </label>
-              <label class="select-filter">
+              <label class="select-filter filter-type">
                 <span>Type :</span>
                 <select id="train-type-filter">
                   <option>Tous</option>
@@ -88,12 +72,6 @@
             <strong data-kpi="updated">-</strong>
             <span data-kpi="quality">Contrôle en attente</span>
           </article>
-        </section>
-
-        <section class="status-strip" aria-label="Statut des données">
-          <span>Données publiques data.gouv</span>
-          <span data-status="quality">Contrôles qualité</span>
-          <span>Mise à jour quotidienne</span>
         </section>
 
         <section class="content-grid">

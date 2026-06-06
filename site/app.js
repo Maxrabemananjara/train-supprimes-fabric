@@ -470,12 +470,6 @@ function renderKpis(data, summary) {
   setText("[data-kpi='route-count']", `${numberFormat(summary.top_route.value)} suppression(s)`);
   setText("[data-kpi='updated']", metadata.update_label || "-");
   setText("[data-kpi='quality']", metadata.quality_ok ? "Données contrôlées" : "Contrôle à vérifier");
-  setText(
-    "[data-status='quality']",
-    metadata.quality_ok
-      ? `Contrôles qualité OK, ${numberFormat(metadata.rejected_row_count)} rejet`
-      : "Contrôles qualité à vérifier"
-  );
   setText("[data-panel='daily-total']", `${numberFormat(summary.total)} suppression(s)`);
 }
 
