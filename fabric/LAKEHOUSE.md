@@ -23,7 +23,7 @@ Files/
 
 ## Role des zones
 
-`bronze` conserve les fichiers sources recuperes, avec une logique d'historisation par date d'extraction. Une extraction peut contenir plusieurs fichiers journaliers afin d'alimenter une periode recente.
+`bronze` conserve les donnees sources recuperees, avec une logique d'historisation par date d'extraction et identifiant de relance. Les chargements historiques sont consolides dans un fichier Bronze trace par fichier source afin de limiter les appels OneLake.
 
 `silver` contient les donnees nettoyees et controlees avant modelisation.
 
