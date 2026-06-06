@@ -99,7 +99,7 @@ h1 {
 }
 
 .select-filter {
-  min-height: 42px;
+  min-height: 40px;
   border: 1px solid #dfe2e8;
   border-radius: 8px;
   background: var(--surface);
@@ -107,15 +107,19 @@ h1 {
 
 .select-filter {
   display: flex;
-  flex: 0 0 196px;
+  flex: 0 0 188px;
   align-items: center;
-  gap: 12px;
-  min-width: 196px;
+  gap: 10px;
+  min-width: 188px;
   padding: 0 12px 0 14px;
 }
 
+.filter-date {
+  flex-basis: 188px;
+}
+
 .filter-station {
-  flex-basis: 300px;
+  flex-basis: 260px;
 }
 
 .filter-type {
