@@ -636,16 +636,54 @@ function populateSelect(select, rows, valueKey, labelKey, emptyLabel) {
   });
 }
 
-function setupDateControls(data) {
+function keepSelectValue(select, value) {
+  if (!select || !value) return "";
+  const exists = Array.from(select.options).some((option) => option.value === value);
+  select.value = exists ? value : "";
+  return select.value;
+}
+
+function populateDimensionControls(data) {
+  const dimensions = data.model?.dimensions || {};
+  const stationSelect = document.getElementById("station-filter");
+  const typeSelect = document.getElementById("train-type-filter");
+
+  populateSelect(
+    stationSelect,
+    [...(dimensions.stations || [])].sort((a, b) => a.name.localeCompare(b.name, "fr")),
+    "station_id",
+    "name",
+    "Toutes"
+  );
+  populateSelect(
+    typeSelect,
+    [...(dimensions.train_types || [])].sort((a, b) => a.label.localeCompare(b.label, "fr")),
+    "train_type_id",
+    "label",
+    "Tous"
+  );
+
+  state.stationId = keepSelectValue(stationSelect, state.stationId);
+  state.trainTypeId = keepSelectValue(typeSelect, state.trainTypeId);
+}
+
+function syncDateInputs(data, resetDates = false, previousLatest = "") {
   const startInput = document.getElementById("start-date-filter");
   const endInput = document.getElementById("end-date-filter");
   const first = firstDateRow(data)?.date_id || "";
   const latest = latestDateRow(data)?.date_id || "";
   if (!startInput || !endInput || !first || !latest) return;
 
-  const defaultStart = dateKey(addDays(parseDate(latest), -29));
-  state.startDate = defaultStart < first ? first : defaultStart;
-  state.endDate = latest;
+  if (resetDates || !state.startDate || !state.endDate) {
+    const defaultStart = dateKey(addDays(parseDate(latest), -29));
+    state.startDate = defaultStart < first ? first : defaultStart;
+    state.endDate = latest;
+  } else {
+    if (state.endDate === previousLatest) state.endDate = latest;
+    if (state.startDate < first) state.startDate = first;
+    if (state.endDate > latest) state.endDate = latest;
+    if (state.startDate > state.endDate) state.startDate = state.endDate;
+  }
 
   [startInput, endInput].forEach((input) => {
     input.min = first;
@@ -653,6 +691,16 @@ function setupDateControls(data) {
   });
   startInput.value = state.startDate;
   endInput.value = state.endDate;
+}
+
+function setupDateControls(data) {
+  const startInput = document.getElementById("start-date-filter");
+  const endInput = document.getElementById("end-date-filter");
+  const first = firstDateRow(data)?.date_id || "";
+  const latest = latestDateRow(data)?.date_id || "";
+  if (!startInput || !endInput || !first || !latest) return;
+
+  syncDateInputs(data, true);
 
   startInput.addEventListener("change", (event) => {
     state.startDate = event.target.value || first;
@@ -673,24 +721,31 @@ function setupDateControls(data) {
   });
 }
 
-function setupControls(data) {
-  const dimensions = data.model?.dimensions || {};
-  setupDateControls(data);
-  populateSelect(
-    document.getElementById("station-filter"),
-    [...(dimensions.stations || [])].sort((a, b) => a.name.localeCompare(b.name, "fr")),
-    "station_id",
-    "name",
-    "Toutes"
-  );
-  populateSelect(
-    document.getElementById("train-type-filter"),
-    [...(dimensions.train_types || [])].sort((a, b) => a.label.localeCompare(b.label, "fr")),
-    "train_type_id",
-    "label",
-    "Tous"
-  );
+async function refreshDashboardData(button) {
+  const previousLatest = latestDateRow(dashboardData)?.date_id || "";
+  const defaultLabel = button?.textContent || "Rafraîchir les données";
 
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Actualisation...";
+  }
+
+  const data = await loadData();
+  dashboardData = data;
+  lookups = createLookups(data);
+  populateDimensionControls(data);
+  syncDateInputs(data, false, previousLatest);
+  renderDashboard();
+
+  if (button) {
+    button.textContent = defaultLabel;
+    button.disabled = false;
+  }
+}
+
+function setupControls(data) {
+  setupDateControls(data);
+  populateDimensionControls(data);
   document.getElementById("station-filter")?.addEventListener("change", (event) => {
     state.stationId = event.target.value;
     renderDashboard();
@@ -698,6 +753,9 @@ function setupControls(data) {
   document.getElementById("train-type-filter")?.addEventListener("change", (event) => {
     state.trainTypeId = event.target.value;
     renderDashboard();
+  });
+  document.getElementById("refresh-data-button")?.addEventListener("click", (event) => {
+    refreshDashboardData(event.currentTarget);
   });
 }
 

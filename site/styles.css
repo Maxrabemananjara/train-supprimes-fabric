@@ -67,7 +67,7 @@ input {
 
 .eyebrow {
   color: var(--accent);
-  font-size: 0.8rem;
+  font-size: clamp(1rem, 1.2vw, 1.2rem);
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -98,7 +98,8 @@ h1 {
   gap: 10px;
 }
 
-.select-filter {
+.select-filter,
+.refresh-button {
   min-height: 40px;
   border: 1px solid #dfe2e8;
   border-radius: 8px;
@@ -107,23 +108,17 @@ h1 {
 
 .select-filter {
   display: flex;
-  flex: 0 0 188px;
+  flex: 0 0 204px;
   align-items: center;
   gap: 10px;
-  min-width: 188px;
+  min-width: 204px;
   padding: 0 12px 0 14px;
 }
 
-.filter-date {
-  flex-basis: 188px;
-}
-
-.filter-station {
-  flex-basis: 260px;
-}
-
+.filter-date,
+.filter-station,
 .filter-type {
-  flex-basis: 220px;
+  flex-basis: 204px;
 }
 
 .select-filter span {
@@ -142,6 +137,28 @@ h1 {
   outline: 0;
   background: transparent;
   color: var(--ink);
+}
+
+.refresh-button {
+  flex: 0 0 204px;
+  min-width: 204px;
+  padding: 0 14px;
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+  font-size: 0.86rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.refresh-button:hover {
+  background: var(--accent-dark);
+  border-color: var(--accent-dark);
+}
+
+.refresh-button:disabled {
+  cursor: wait;
+  opacity: 0.72;
 }
 
 .kpi-grid {
@@ -460,8 +477,8 @@ td:last-child {
     min-width: 180px;
   }
 
-  .filter-station {
-    min-width: 240px;
+  .refresh-button {
+    min-width: 204px;
   }
 
   h1 {
