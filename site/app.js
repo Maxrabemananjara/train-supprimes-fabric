@@ -16,7 +16,7 @@ const fallbackData = {
   }
 };
 
-const magentaScale = ["#d0005f", "#83005c", "#ef6a9d", "#b71578", "#f5a5c8", "#562047"];
+const magentaScale = ["#d0005f", "#7d0f73", "#ef6a9d", "#2fb8c5", "#f59f00", "#6b5fd8", "#8cc63f"];
 const stationPositions = {
   "abancourt": { lat: 49.6903, lon: 1.7744 },
   "agen": { lat: 44.2031, lon: 0.6206 },
@@ -578,46 +578,52 @@ function renderCategoryBreakdown(rows) {
     return;
   }
 
-  const main = filteredRows[0];
-  const otherValue = total - main.value;
-  const mainPercent = ((main.value / total) * 100).toLocaleString("fr-FR", {
-    maximumFractionDigits: 1
-  });
-  const otherPercent = ((otherValue / total) * 100).toLocaleString("fr-FR", {
-    maximumFractionDigits: 1
-  });
   const cx = 185;
   const cy = 130;
-  const outerRadius = 102;
-  const innerRadius = 58;
-  const startAngle = -22;
-  const mainAngle = (main.value / total) * 360;
-  const mainPath = donutSlicePath(cx, cy, outerRadius, innerRadius, startAngle, startAngle + mainAngle);
-  const otherPath = otherValue
-    ? donutSlicePath(cx, cy, outerRadius, innerRadius, startAngle + mainAngle, startAngle + 360)
-    : "";
-  const otherLabel = otherValue ? "Autres" : "";
+  const outerRadius = 88;
+  const innerRadius = 52;
+  const startAngle = -70;
+  const badgePositions = [
+    { x: 185, y: 25 },
+    { x: 297, y: 82 },
+    { x: 296, y: 180 },
+    { x: 185, y: 235 },
+    { x: 74, y: 180 },
+    { x: 74, y: 82 }
+  ];
+  let cursor = startAngle;
+  const slices = filteredRows
+    .map((item, index) => {
+      const angle = (item.value / total) * 360;
+      const path = donutSlicePath(cx, cy, outerRadius, innerRadius, cursor, cursor + angle);
+      cursor += angle;
+      return `<path class="category-donut-slice" d="${path}" fill="${magentaScale[index % magentaScale.length]}"></path>`;
+    })
+    .join("");
+  const badges = filteredRows
+    .map((item, index) => {
+      const position = badgePositions[index % badgePositions.length];
+      const percent = ((item.value / total) * 100).toLocaleString("fr-FR", {
+        maximumFractionDigits: 1
+      });
+      const color = magentaScale[index % magentaScale.length];
+      return `
+        <g class="category-donut-badge" transform="translate(${position.x} ${position.y})">
+          <rect x="-52" y="-20" width="104" height="40" rx="5"></rect>
+          <circle cx="-40" cy="-6" r="4" fill="${color}"></circle>
+          <text class="category-donut-label" x="5" y="-4">${escapeHtml(item.label)}</text>
+          <text class="category-donut-percent" x="0" y="13">${percent} %</text>
+        </g>
+      `;
+    })
+    .join("");
 
   target.innerHTML = `
     <div class="category-donut-view">
       <svg viewBox="0 0 370 260" role="img">
-        ${otherValue ? `<path class="category-donut-slice" d="${otherPath}" fill="#f3c3d9"></path>` : ""}
-        <path class="category-donut-slice" d="${mainPath}" fill="${magentaScale[0]}"></path>
+        ${slices}
         <circle class="category-donut-hole" cx="${cx}" cy="${cy}" r="${innerRadius - 2}"></circle>
-        <g class="category-donut-badge" transform="translate(185 178)">
-          <rect x="-42" y="-22" width="84" height="43" rx="5"></rect>
-          <text class="category-donut-label" x="0" y="-5">${escapeHtml(main.label)}</text>
-          <text class="category-donut-percent" x="0" y="12">${mainPercent} %</text>
-        </g>
-        ${
-          otherValue
-            ? `<g class="category-donut-badge" transform="translate(146 55)">
-                <rect x="-44" y="-22" width="88" height="43" rx="5"></rect>
-                <text class="category-donut-label" x="0" y="-5">${otherLabel}</text>
-                <text class="category-donut-percent" x="0" y="12">${otherPercent} %</text>
-              </g>`
-            : ""
-        }
+        ${badges}
       </svg>
     </div>
   `;
