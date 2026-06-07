@@ -313,61 +313,45 @@ h1 {
 
 .category-breakdown {
   display: grid;
-  align-content: center;
-  gap: 15px;
+  place-items: center;
   min-height: 260px;
 }
 
-.category-row {
-  display: grid;
-  gap: 7px;
+.category-donut-view {
+  width: min(100%, 370px);
+  min-height: 260px;
 }
 
-.category-row-head {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 12px;
-  align-items: baseline;
-}
-
-.category-name {
-  overflow: hidden;
-  color: var(--ink);
-  font-size: 0.95rem;
-  font-weight: 800;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.category-metric {
-  display: flex;
-  gap: 8px;
-  align-items: baseline;
-  color: var(--ink);
-  font-weight: 900;
-}
-
-.category-metric em {
-  min-width: 48px;
-  color: var(--muted);
-  font-size: 0.82rem;
-  font-style: normal;
-  font-weight: 800;
-  text-align: right;
-}
-
-.category-track {
-  height: 14px;
-  overflow: hidden;
-  background: #f7edf3;
-  border-radius: 999px;
-}
-
-.category-fill {
+.category-donut-view svg {
   display: block;
-  height: 100%;
-  background: linear-gradient(90deg, var(--accent-dark), var(--accent));
-  border-radius: inherit;
+  width: 100%;
+  height: 260px;
+}
+
+.category-donut-slice {
+  filter: drop-shadow(0 12px 18px rgba(155, 0, 83, 0.12));
+}
+
+.category-donut-hole {
+  fill: var(--surface);
+}
+
+.category-donut-badge rect {
+  fill: rgba(52, 56, 65, 0.9);
+}
+
+.category-donut-badge text {
+  fill: #fff;
+  font-weight: 900;
+  text-anchor: middle;
+}
+
+.category-donut-label {
+  font-size: 0.78rem;
+}
+
+.category-donut-percent {
+  font-size: 0.9rem;
 }
 
 .mini-bars {

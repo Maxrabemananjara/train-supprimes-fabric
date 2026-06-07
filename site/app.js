@@ -544,6 +544,30 @@ function renderBars(containerId, rows) {
     .join("");
 }
 
+function polarPoint(cx, cy, radius, angle) {
+  const radians = ((angle - 90) * Math.PI) / 180;
+  return {
+    x: cx + radius * Math.cos(radians),
+    y: cy + radius * Math.sin(radians)
+  };
+}
+
+function donutSlicePath(cx, cy, outerRadius, innerRadius, startAngle, endAngle) {
+  const safeEndAngle = Math.min(endAngle, startAngle + 359.99);
+  const outerStart = polarPoint(cx, cy, outerRadius, startAngle);
+  const outerEnd = polarPoint(cx, cy, outerRadius, safeEndAngle);
+  const innerStart = polarPoint(cx, cy, innerRadius, startAngle);
+  const innerEnd = polarPoint(cx, cy, innerRadius, safeEndAngle);
+  const largeArc = safeEndAngle - startAngle > 180 ? 1 : 0;
+  return [
+    `M ${outerStart.x} ${outerStart.y}`,
+    `A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${outerEnd.x} ${outerEnd.y}`,
+    `L ${innerEnd.x} ${innerEnd.y}`,
+    `A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${innerStart.x} ${innerStart.y}`,
+    "Z"
+  ].join(" ");
+}
+
 function renderCategoryBreakdown(rows) {
   const target = document.getElementById("category-chart");
   if (!target) return;
@@ -554,41 +578,49 @@ function renderCategoryBreakdown(rows) {
     return;
   }
 
-  const visibleRows =
-    filteredRows.length > 5
-      ? [
-          ...filteredRows.slice(0, 5),
-          {
-            label: "Autres",
-            value: filteredRows.slice(5).reduce((sum, item) => sum + item.value, 0)
-          }
-        ]
-      : filteredRows;
+  const main = filteredRows[0];
+  const otherValue = total - main.value;
+  const mainPercent = ((main.value / total) * 100).toLocaleString("fr-FR", {
+    maximumFractionDigits: 1
+  });
+  const otherPercent = ((otherValue / total) * 100).toLocaleString("fr-FR", {
+    maximumFractionDigits: 1
+  });
+  const cx = 185;
+  const cy = 130;
+  const outerRadius = 102;
+  const innerRadius = 58;
+  const startAngle = -22;
+  const mainAngle = (main.value / total) * 360;
+  const mainPath = donutSlicePath(cx, cy, outerRadius, innerRadius, startAngle, startAngle + mainAngle);
+  const otherPath = otherValue
+    ? donutSlicePath(cx, cy, outerRadius, innerRadius, startAngle + mainAngle, startAngle + 360)
+    : "";
+  const otherLabel = otherValue ? "Autres" : "";
 
-  target.innerHTML = visibleRows
-    .map((item, index) => {
-      const share = (item.value / total) * 100;
-      const width = Math.max(2, share);
-      const percent = share.toLocaleString("fr-FR", {
-        maximumFractionDigits: 1
-      });
-      const color = magentaScale[index % magentaScale.length];
-      return `
-        <div class="category-row">
-          <div class="category-row-head">
-            <span class="category-name" title="${escapeHtml(item.label)}">${escapeHtml(item.label)}</span>
-            <span class="category-metric">
-              <strong>${numberFormat(item.value)}</strong>
-              <em>${percent} %</em>
-            </span>
-          </div>
-          <span class="category-track">
-            <span class="category-fill" style="width: ${width}%; background: ${color}"></span>
-          </span>
-        </div>
-      `;
-    })
-    .join("");
+  target.innerHTML = `
+    <div class="category-donut-view">
+      <svg viewBox="0 0 370 260" role="img">
+        ${otherValue ? `<path class="category-donut-slice" d="${otherPath}" fill="#f3c3d9"></path>` : ""}
+        <path class="category-donut-slice" d="${mainPath}" fill="${magentaScale[0]}"></path>
+        <circle class="category-donut-hole" cx="${cx}" cy="${cy}" r="${innerRadius - 2}"></circle>
+        <g class="category-donut-badge" transform="translate(185 178)">
+          <rect x="-42" y="-22" width="84" height="43" rx="5"></rect>
+          <text class="category-donut-label" x="0" y="-5">${escapeHtml(main.label)}</text>
+          <text class="category-donut-percent" x="0" y="12">${mainPercent} %</text>
+        </g>
+        ${
+          otherValue
+            ? `<g class="category-donut-badge" transform="translate(146 55)">
+                <rect x="-44" y="-22" width="88" height="43" rx="5"></rect>
+                <text class="category-donut-label" x="0" y="-5">${otherLabel}</text>
+                <text class="category-donut-percent" x="0" y="12">${otherPercent} %</text>
+              </g>`
+            : ""
+        }
+      </svg>
+    </div>
+  `;
 }
 
 function renderSlots(rows) {
