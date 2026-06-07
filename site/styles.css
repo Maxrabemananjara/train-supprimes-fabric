@@ -67,14 +67,15 @@ input {
 
 .eyebrow {
   color: var(--accent);
-  font-size: clamp(1rem, 1.2vw, 1.2rem);
-  font-weight: 800;
+  font-size: clamp(2.5rem, 4.2vw, 4.35rem);
+  font-weight: 900;
+  line-height: 0.92;
   text-transform: uppercase;
 }
 
 h1 {
-  margin: 4px 0;
-  font-size: clamp(2rem, 4vw, 4rem);
+  margin: 6px 0 4px;
+  font-size: clamp(2.1rem, 3.2vw, 3.5rem);
   line-height: 0.95;
   letter-spacing: 0;
 }
@@ -483,6 +484,10 @@ td:last-child {
 
   h1 {
     font-size: 2rem;
+  }
+
+  .eyebrow {
+    font-size: 2.15rem;
   }
 
   .subtitle {

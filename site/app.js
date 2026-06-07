@@ -723,6 +723,7 @@ function setupDateControls(data) {
 
 async function refreshDashboardData(button) {
   const previousLatest = latestDateRow(dashboardData)?.date_id || "";
+  const previousUpdateLabel = dashboardData.metadata?.update_label || "";
   const defaultLabel = button?.textContent || "Rafraîchir les données";
 
   if (button) {
@@ -738,8 +739,12 @@ async function refreshDashboardData(button) {
   renderDashboard();
 
   if (button) {
-    button.textContent = defaultLabel;
-    button.disabled = false;
+    const nextUpdateLabel = dashboardData.metadata?.update_label || "";
+    button.textContent = nextUpdateLabel && nextUpdateLabel !== previousUpdateLabel ? "Données mises à jour" : "Déjà à jour";
+    window.setTimeout(() => {
+      button.textContent = defaultLabel;
+      button.disabled = false;
+    }, 1400);
   }
 }
 
