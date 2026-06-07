@@ -544,37 +544,13 @@ function renderBars(containerId, rows) {
     .join("");
 }
 
-function polarPoint(cx, cy, radius, angle) {
-  const radians = ((angle - 90) * Math.PI) / 180;
-  return {
-    x: cx + radius * Math.cos(radians),
-    y: cy + radius * Math.sin(radians)
-  };
-}
-
-function donutSlicePath(cx, cy, outerRadius, innerRadius, startAngle, endAngle) {
-  const safeEndAngle = Math.min(endAngle, startAngle + 359.99);
-  const outerStart = polarPoint(cx, cy, outerRadius, startAngle);
-  const outerEnd = polarPoint(cx, cy, outerRadius, safeEndAngle);
-  const innerStart = polarPoint(cx, cy, innerRadius, startAngle);
-  const innerEnd = polarPoint(cx, cy, innerRadius, safeEndAngle);
-  const largeArc = safeEndAngle - startAngle > 180 ? 1 : 0;
-  return [
-    `M ${outerStart.x} ${outerStart.y}`,
-    `A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${outerEnd.x} ${outerEnd.y}`,
-    `L ${innerEnd.x} ${innerEnd.y}`,
-    `A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${innerStart.x} ${innerStart.y}`,
-    "Z"
-  ].join(" ");
-}
-
-function renderDonut(rows) {
-  const donut = document.getElementById("category-donut");
-  if (!donut) return;
+function renderCategoryBreakdown(rows) {
+  const target = document.getElementById("category-chart");
+  if (!target) return;
   const filteredRows = rows.filter((item) => item.value > 0);
   const total = filteredRows.reduce((sum, item) => sum + item.value, 0);
   if (!filteredRows.length || !total) {
-    donut.innerHTML = '<div class="empty-state">Aucune donnée disponible.</div>';
+    target.innerHTML = '<div class="empty-state">Aucune donnée disponible.</div>';
     return;
   }
 
@@ -589,58 +565,30 @@ function renderDonut(rows) {
         ]
       : filteredRows;
 
-  const cx = 132;
-  const cy = 130;
-  const outerRadius = 92;
-  const innerRadius = 56;
-  const labelX = 332;
-  const labelYStart = 34;
-  const labelGap = 36;
-  let cursor = -18;
-
-  const slices = visibleRows
+  target.innerHTML = visibleRows
     .map((item, index) => {
-      const color = magentaScale[index % magentaScale.length];
-      const start = cursor;
-      const angle = (item.value / total) * 360;
-      const end = cursor + angle;
-      cursor = end;
-      return `<path class="donut-slice" d="${donutSlicePath(cx, cy, outerRadius, innerRadius, start, end)}" fill="${color}"></path>`;
-    })
-    .join("");
-
-  cursor = -18;
-  const callouts = visibleRows
-    .map((item, index) => {
-      const color = magentaScale[index % magentaScale.length];
-      const start = cursor;
-      const angle = (item.value / total) * 360;
-      const end = cursor + angle;
-      const mid = start + angle / 2;
-      cursor = end;
-      const anchor = polarPoint(cx, cy, outerRadius + 5, mid);
-      const rowY = labelYStart + index * labelGap;
-      const percent = ((item.value / total) * 100).toLocaleString("fr-FR", {
+      const share = (item.value / total) * 100;
+      const width = Math.max(2, share);
+      const percent = share.toLocaleString("fr-FR", {
         maximumFractionDigits: 1
       });
+      const color = magentaScale[index % magentaScale.length];
       return `
-        <path class="donut-callout-line" stroke="${color}" d="M ${anchor.x} ${anchor.y} C ${anchor.x + 36} ${anchor.y}, 276 ${rowY}, ${labelX - 18} ${rowY}"></path>
-        <circle class="donut-callout-dot" cx="${labelX - 7}" cy="${rowY}" r="5" fill="${color}"></circle>
-        <text class="donut-callout-label" x="${labelX + 8}" y="${rowY - 4}">${escapeHtml(item.label)}</text>
-        <text class="donut-callout-value" x="${labelX + 8}" y="${rowY + 14}">${numberFormat(item.value)} suppression(s) · ${percent} %</text>
+        <div class="category-row">
+          <div class="category-row-head">
+            <span class="category-name" title="${escapeHtml(item.label)}">${escapeHtml(item.label)}</span>
+            <span class="category-metric">
+              <strong>${numberFormat(item.value)}</strong>
+              <em>${percent} %</em>
+            </span>
+          </div>
+          <span class="category-track">
+            <span class="category-fill" style="width: ${width}%; background: ${color}"></span>
+          </span>
+        </div>
       `;
     })
     .join("");
-
-  donut.innerHTML = `
-    <svg viewBox="0 0 620 260" role="img">
-      ${slices}
-      <circle cx="${cx}" cy="${cy}" r="${innerRadius - 2}" fill="var(--surface)"></circle>
-      <text class="donut-center-value" x="${cx}" y="${cy - 3}">${numberFormat(total)}</text>
-      <text class="donut-center-label" x="${cx}" y="${cy + 18}">suppressions</text>
-      ${callouts}
-    </svg>
-  `;
 }
 
 function renderSlots(rows) {
@@ -687,7 +635,7 @@ function renderDashboard() {
   renderKpis(dashboardData, summary);
   renderLineChart(summary.daily_evolution);
   renderBars("station-chart", summary.top_stations);
-  renderDonut(summary.category_distribution);
+  renderCategoryBreakdown(summary.category_distribution);
   renderSlots(summary.time_slot_distribution);
   renderRoutes(summary.top_routes);
 }
