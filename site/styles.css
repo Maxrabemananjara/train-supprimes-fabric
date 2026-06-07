@@ -313,8 +313,8 @@ h1 {
 
 .category-breakdown {
   display: grid;
-  grid-template-columns: minmax(170px, 0.9fr) minmax(150px, 1fr);
-  gap: 12px;
+  grid-template-columns: minmax(230px, 1.25fr) minmax(150px, 0.55fr);
+  gap: 18px;
   align-items: center;
   min-height: 260px;
 }
@@ -359,14 +359,15 @@ h1 {
 
 .category-legend {
   display: grid;
-  width: 100%;
+  width: min(100%, 210px);
   min-width: 0;
   gap: 9px;
+  justify-self: start;
 }
 
 .category-legend-item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 48px;
+  grid-template-columns: minmax(90px, 1fr) 38px;
   gap: 8px;
   align-items: center;
   color: var(--ink);
