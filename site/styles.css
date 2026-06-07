@@ -313,13 +313,15 @@ h1 {
 
 .category-breakdown {
   display: grid;
+  grid-template-columns: minmax(170px, 0.9fr) minmax(150px, 1fr);
   gap: 12px;
-  place-items: center;
+  align-items: center;
   min-height: 260px;
 }
 
 .category-donut-view {
-  width: min(100%, 370px);
+  width: 100%;
+  min-width: 0;
   min-height: 260px;
 }
 
@@ -358,16 +360,17 @@ h1 {
 .category-legend {
   display: grid;
   width: 100%;
-  gap: 8px;
+  min-width: 0;
+  gap: 9px;
 }
 
 .category-legend-item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto 54px;
-  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) 42px 50px;
+  gap: 8px;
   align-items: center;
   color: var(--ink);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
 }
 
 .category-legend-label {
@@ -551,6 +554,14 @@ td:last-child {
   .kpi-grid,
   .content-grid {
     grid-template-columns: 1fr;
+  }
+
+  .category-breakdown {
+    grid-template-columns: 1fr;
+  }
+
+  .category-donut-view {
+    width: min(100%, 370px);
   }
 
   .panel-large {
