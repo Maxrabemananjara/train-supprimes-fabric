@@ -366,7 +366,7 @@ h1 {
 
 .category-legend-item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 42px 50px;
+  grid-template-columns: minmax(0, 1fr) 48px;
   gap: 8px;
   align-items: center;
   color: var(--ink);
@@ -395,13 +395,6 @@ h1 {
 
 .category-legend-item strong {
   font-weight: 900;
-  text-align: right;
-}
-
-.category-legend-item em {
-  color: var(--muted);
-  font-style: normal;
-  font-weight: 800;
   text-align: right;
 }
 
