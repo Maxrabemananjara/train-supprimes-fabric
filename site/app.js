@@ -617,6 +617,24 @@ function renderCategoryBreakdown(rows) {
       `;
     })
     .join("");
+  const legend = filteredRows
+    .map((item, index) => {
+      const percent = ((item.value / total) * 100).toLocaleString("fr-FR", {
+        maximumFractionDigits: 1
+      });
+      const color = magentaScale[index % magentaScale.length];
+      return `
+        <div class="category-legend-item">
+          <span class="category-legend-label">
+            <span class="category-legend-dot" style="background: ${color}"></span>
+            <span title="${escapeHtml(item.label)}">${escapeHtml(item.label)}</span>
+          </span>
+          <strong>${numberFormat(item.value)}</strong>
+          <em>${percent} %</em>
+        </div>
+      `;
+    })
+    .join("");
 
   target.innerHTML = `
     <div class="category-donut-view">
@@ -626,6 +644,7 @@ function renderCategoryBreakdown(rows) {
         ${badges}
       </svg>
     </div>
+    <div class="category-legend">${legend}</div>
   `;
 }
 
