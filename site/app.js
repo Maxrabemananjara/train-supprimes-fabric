@@ -484,12 +484,19 @@ function renderLineChart(rows) {
 
   const width = 920;
   const height = 260;
-  const padding = { top: 22, right: 24, bottom: 40, left: 46 };
+  const padding = { top: 22, right: 24, bottom: 40, left: 68 };
   const maxValue = Math.max(...values.map((item) => item.value), 1);
+  const rawStep = maxValue / 4;
+  const stepPower = 10 ** Math.floor(Math.log10(rawStep));
+  const stepBase = rawStep / stepPower;
+  const niceBase = stepBase <= 1 ? 1 : stepBase <= 2 ? 2 : stepBase <= 2.5 ? 2.5 : stepBase <= 5 ? 5 : 10;
+  const yStep = Math.max(1, Math.ceil(niceBase * stepPower));
+  const axisMax = Math.max(yStep * 4, maxValue);
+  const yTicks = Array.from({ length: 5 }, (_, index) => yStep * index);
   const xStep = values.length > 1 ? (width - padding.left - padding.right) / (values.length - 1) : 0;
   const points = values.map((item, index) => {
     const x = padding.left + index * xStep;
-    const y = height - padding.bottom - (item.value / maxValue) * (height - padding.top - padding.bottom);
+    const y = height - padding.bottom - (item.value / axisMax) * (height - padding.top - padding.bottom);
     return { ...item, x, y };
   });
   const path = points.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
@@ -501,6 +508,15 @@ function renderLineChart(rows) {
       return `<text class="axis-label" x="${point.x}" y="${height - 12}" text-anchor="middle">${compactDate(point.date)}</text>`;
     })
     .join("");
+  const yAxisLabels = yTicks
+    .map((tick) => {
+      const y = height - padding.bottom - (tick / axisMax) * (height - padding.top - padding.bottom);
+      return `
+        <line class="grid-line" x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}"></line>
+        <text class="y-axis-label" x="${padding.left - 12}" y="${y + 4}" text-anchor="end">${numberFormat(tick)}</text>
+      `;
+    })
+    .join("");
 
   target.innerHTML = `
     <svg viewBox="0 0 ${width} ${height}" role="img">
@@ -510,6 +526,7 @@ function renderLineChart(rows) {
           <stop offset="100%" stop-color="#d0005f" stop-opacity="0.03"></stop>
         </linearGradient>
       </defs>
+      ${yAxisLabels}
       <line x1="${padding.left}" y1="${height - padding.bottom}" x2="${width - padding.right}" y2="${height - padding.bottom}" stroke="#eceef3"></line>
       <line x1="${padding.left}" y1="${padding.top}" x2="${padding.left}" y2="${height - padding.bottom}" stroke="#eceef3"></line>
       <path d="${area}" fill="url(#areaGradient)"></path>
