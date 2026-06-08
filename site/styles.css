@@ -140,16 +140,9 @@ h1 {
   color: var(--ink);
 }
 
-.refresh-control {
-  display: grid;
+.refresh-button {
   flex: 0 0 204px;
   min-width: 204px;
-  gap: 5px;
-}
-
-.refresh-button {
-  width: 100%;
-  min-width: 0;
   padding: 0 14px;
   color: #fff;
   background: var(--accent);
@@ -167,27 +160,6 @@ h1 {
 .refresh-button:disabled {
   cursor: wait;
   opacity: 0.72;
-}
-
-.refresh-status {
-  min-height: 16px;
-  color: var(--muted);
-  font-size: 0.72rem;
-  font-weight: 700;
-  line-height: 1.2;
-  text-align: right;
-}
-
-.refresh-status[data-state="success"] {
-  color: #0d7358;
-}
-
-.refresh-status[data-state="warning"] {
-  color: #a65b00;
-}
-
-.refresh-status[data-state="error"] {
-  color: #a00038;
 }
 
 .kpi-grid {
@@ -565,7 +537,7 @@ td:last-child {
     min-width: 180px;
   }
 
-  .refresh-control {
+  .refresh-button {
     min-width: 204px;
   }
 

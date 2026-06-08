@@ -248,17 +248,6 @@ function setText(selector, value) {
   if (element) element.textContent = value;
 }
 
-function setRefreshStatus(message = "", stateName = "") {
-  const status = document.getElementById("refresh-status");
-  if (!status) return;
-  status.textContent = message;
-  if (stateName) {
-    status.dataset.state = stateName;
-  } else {
-    status.removeAttribute("data-state");
-  }
-}
-
 async function loadData(options = {}) {
   const { useFallback = true } = options;
   try {
@@ -831,8 +820,6 @@ async function refreshDashboardData(button) {
     button.textContent = "Actualisation...";
   }
 
-  setRefreshStatus("Recherche de la dernière version publiée...");
-
   try {
     const data = await loadData({ useFallback: false });
     dashboardData = data;
@@ -849,18 +836,14 @@ async function refreshDashboardData(button) {
     if (button) {
       if (hasNewVersion) {
         button.textContent = "Données actualisées";
-        setRefreshStatus(`Dernière version publiée : ${nextUpdateLabel || shortDate(nextLatest)}`, "success");
       } else if (rangeChanged) {
         button.textContent = "Affichage actualisé";
-        setRefreshStatus("Affichage replacé sur la dernière période publiée", "success");
       } else {
         button.textContent = "Déjà à jour";
-        setRefreshStatus(`Dernière version déjà affichée : ${nextUpdateLabel || shortDate(nextLatest)}`, "warning");
       }
     }
   } catch (error) {
     if (button) button.textContent = "Erreur de lecture";
-    setRefreshStatus("Mise à jour impossible, données publiées conservées", "error");
   } finally {
     if (!button) return;
     window.setTimeout(() => {
