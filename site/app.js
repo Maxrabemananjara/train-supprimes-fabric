@@ -248,12 +248,25 @@ function setText(selector, value) {
   if (element) element.textContent = value;
 }
 
-async function loadData() {
+function setRefreshStatus(message = "", stateName = "") {
+  const status = document.getElementById("refresh-status");
+  if (!status) return;
+  status.textContent = message;
+  if (stateName) {
+    status.dataset.state = stateName;
+  } else {
+    status.removeAttribute("data-state");
+  }
+}
+
+async function loadData(options = {}) {
+  const { useFallback = true } = options;
   try {
     const response = await fetch(`data/dashboard.json?v=${Date.now()}`);
     if (!response.ok) throw new Error("data unavailable");
     return await response.json();
   } catch (error) {
+    if (!useFallback) throw error;
     return fallbackData;
   }
 }
@@ -809,6 +822,8 @@ function setupDateControls(data) {
 async function refreshDashboardData(button) {
   const previousLatest = latestDateRow(dashboardData)?.date_id || "";
   const previousUpdateLabel = dashboardData.metadata?.update_label || "";
+  const previousStartDate = state.startDate;
+  const previousEndDate = state.endDate;
   const defaultLabel = button?.textContent || "Rafraîchir les données";
 
   if (button) {
@@ -816,20 +831,42 @@ async function refreshDashboardData(button) {
     button.textContent = "Actualisation...";
   }
 
-  const data = await loadData();
-  dashboardData = data;
-  lookups = createLookups(data);
-  populateDimensionControls(data);
-  syncDateInputs(data, false, previousLatest);
-  renderDashboard();
+  setRefreshStatus("Recherche de la dernière version publiée...");
 
-  if (button) {
+  try {
+    const data = await loadData({ useFallback: false });
+    dashboardData = data;
+    lookups = createLookups(data);
+    populateDimensionControls(data);
+    syncDateInputs(data, true, previousLatest);
+    renderDashboard();
+
+    const nextLatest = latestDateRow(dashboardData)?.date_id || "";
     const nextUpdateLabel = dashboardData.metadata?.update_label || "";
-    button.textContent = nextUpdateLabel && nextUpdateLabel !== previousUpdateLabel ? "Données mises à jour" : "Déjà à jour";
+    const hasNewVersion = (nextLatest && nextLatest !== previousLatest) || (nextUpdateLabel && nextUpdateLabel !== previousUpdateLabel);
+    const rangeChanged = previousStartDate !== state.startDate || previousEndDate !== state.endDate;
+
+    if (button) {
+      if (hasNewVersion) {
+        button.textContent = "Données actualisées";
+        setRefreshStatus(`Dernière version publiée : ${nextUpdateLabel || shortDate(nextLatest)}`, "success");
+      } else if (rangeChanged) {
+        button.textContent = "Affichage actualisé";
+        setRefreshStatus("Affichage replacé sur la dernière période publiée", "success");
+      } else {
+        button.textContent = "Déjà à jour";
+        setRefreshStatus(`Dernière version déjà affichée : ${nextUpdateLabel || shortDate(nextLatest)}`, "warning");
+      }
+    }
+  } catch (error) {
+    if (button) button.textContent = "Erreur de lecture";
+    setRefreshStatus("Mise à jour impossible, données publiées conservées", "error");
+  } finally {
+    if (!button) return;
     window.setTimeout(() => {
       button.textContent = defaultLabel;
       button.disabled = false;
-    }, 1400);
+    }, 1600);
   }
 }
 

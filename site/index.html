@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Trains supprimés</title>
-    <link rel="stylesheet" href="styles.css?v=20260608-y-axis" />
+    <link rel="stylesheet" href="styles.css?v=20260608-refresh-flow" />
   </head>
   <body>
     <div class="app-shell">
@@ -37,7 +37,10 @@
                   <option>Tous</option>
                 </select>
               </label>
-              <button id="refresh-data-button" class="refresh-button" type="button">Rafraîchir les données</button>
+              <div class="refresh-control">
+                <button id="refresh-data-button" class="refresh-button" type="button">Rafraîchir les données</button>
+                <span id="refresh-status" class="refresh-status" role="status" aria-live="polite"></span>
+              </div>
             </div>
           </div>
         </header>
@@ -131,6 +134,6 @@
       </main>
     </div>
 
-    <script src="app.js?v=20260608-y-axis"></script>
+    <script src="app.js?v=20260608-refresh-flow"></script>
   </body>
 </html>
