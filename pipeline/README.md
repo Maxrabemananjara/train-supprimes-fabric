@@ -1,25 +1,56 @@
 # Pipeline
 
-Ce dossier contiendra les scripts de traitement du projet.
+Ce dossier contient les scripts qui alimentent le dashboard public.
 
-Flux cible :
+## Flux de traitement
 
 ```text
-ingestion data.gouv
-  -> controles Bronze
+API data.gouv
+  -> récupération des CSV
+  -> contrôle Bronze
   -> nettoyage Silver
-  -> modele Gold faits / dimensions
-  -> export JSON pour le site
+  -> modèle Gold faits / dimensions
+  -> export site/data/dashboard.json
 ```
 
-Le pipeline devra etre executable automatiquement chaque jour et relancable manuellement.
+## Scripts
 
-Le premier script d'ingestion Bronze est `ingest_bronze.py`. Par defaut, il recupere les 120 derniers fichiers CSV disponibles pour l'actualisation courante. La valeur `0` permet de charger tout l'historique disponible.
+| Script | Rôle |
+| --- | --- |
+| `ingest_bronze.py` | Lit les ressources CSV data.gouv et conserve les métadonnées source. |
+| `transform_silver.py` | Nettoie les lignes, contrôle le schéma et produit le rapport qualité. |
+| `build_gold.py` | Construit les indicateurs, dimensions, faits et agrégats du dashboard. |
+| `build_site_data.py` | Met à jour le fichier public `site/data/dashboard.json`. |
+| `run_daily.py` | Exécute le flux complet avec les paramètres par défaut. |
 
-La transformation Silver est portee par `transform_silver.py`.
+## Relance locale
 
-Les sorties Gold sont construites par `build_gold.py` a partir de l'historique Silver disponible. Elles contiennent les indicateurs, les tables de dimensions et la table de faits utilisees par le site statique via `site/data/dashboard.json`.
+Reconstruire le fichier public à partir des ressources disponibles :
 
-Le flux complet peut etre relance avec `run_daily.py`. Par defaut, il reconstruit Gold avec tout le Silver disponible afin de conserver l'historique apres chaque mise a jour.
+```bash
+python pipeline/build_site_data.py
+```
 
-La source de donnees est decrite dans `SOURCES.md`.
+Reconstruire l'historique complet :
+
+```bash
+python pipeline/build_site_data.py --full
+```
+
+Relancer le flux quotidien :
+
+```bash
+python pipeline/run_daily.py
+```
+
+## Actualisation incrémentale
+
+Le script `build_site_data.py` lit le dernier `dashboard.json` publié. Il compare ensuite la fin de période connue avec les ressources CSV disponibles sur data.gouv.
+
+Si un nouveau fichier existe, il ajoute les lignes au modèle existant et recalcule les indicateurs.
+
+Si aucun nouveau fichier n'existe, il met uniquement à jour la date de contrôle du jour. Cela permet de distinguer une source inchangée d'une pipeline qui ne tourne pas.
+
+## Automatisation
+
+Le workflow GitHub Actions `Actualiser les donnees` exécute cette pipeline plusieurs fois par jour. En cas de changement du fichier public, le commit est réalisé avec le compte du dépôt et le site est republié.

@@ -1,6 +1,6 @@
 # Structure Lakehouse
 
-Le Lakehouse du projet est organise selon une approche medaillon simple.
+Le Lakehouse est organisé selon une approche médaillon.
 
 ## Lakehouse
 
@@ -21,15 +21,23 @@ Files/
     quality/
 ```
 
-## Role des zones
+## Bronze
 
-`bronze` conserve les donnees sources recuperees, avec une logique d'historisation par date d'extraction et identifiant de relance. Les chargements historiques sont consolides dans un fichier Bronze trace par fichier source afin de limiter les appels OneLake.
+La zone Bronze conserve les fichiers sources et leurs métadonnées :
 
-`silver` contient les donnees nettoyees et controlees avant modelisation.
+- nom de ressource ;
+- URL source ;
+- date de modification ;
+- date d'extraction ;
+- fichier d'origine.
 
-`gold` contient les sorties pretes a alimenter le tableau de bord public et le suivi qualite. Les indicateurs sont recalcules depuis une table de faits et des dimensions derivees de l'historique Silver disponible.
+Elle permet de revenir à la donnée brute en cas de contrôle ou de reprise.
 
-## Sorties Silver
+## Silver
+
+La zone Silver contient les données nettoyées.
+
+Sortie attendue :
 
 ```text
 Files/
@@ -40,24 +48,27 @@ Files/
         quality_report.json
 ```
 
-La sortie Silver applique les controles de base : colonnes attendues, valeurs obligatoires, dates exploitables, duree positive et suppression des doublons exacts.
+Les contrôles Silver portent sur le schéma, les dates, les heures, les valeurs obligatoires et les doublons.
 
-## Tables prevues
+## Gold
+
+La zone Gold contient les sorties prêtes à l'analyse.
+
+Tables logiques :
 
 ```text
-silver_trains_supprimes
-gold_kpi
-gold_evolution_journaliere
-gold_repartition_type_train
-gold_top_gares_depart
-gold_top_liaisons
 fact_suppressions
 dim_date
 dim_gare
 dim_liaison
 dim_type_train
 dim_tranche_horaire
+gold_kpi
+gold_evolution_journaliere
+gold_repartition_type_train
+gold_top_gares
+gold_top_liaisons
 gold_qualite_pipeline
 ```
 
-Les sorties Gold sont historisees par date de traitement dans `Files/gold/dashboard` et `Files/gold/quality`.
+Ces sorties alimentent le fichier public `dashboard.json` utilisé par le site GitHub Pages.

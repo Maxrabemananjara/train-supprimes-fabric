@@ -1,11 +1,23 @@
 # Documentation
 
-Ce dossier regroupe la documentation du projet :
+Ce dossier rassemble les notes de cadrage du projet.
 
-- architecture cible ;
-- mode operatoire ;
-- description des sources ;
-- controles qualite ;
-- limites connues du jeu de donnees ;
-- elements de presentation pour le site public.
+## Contenu
 
+- `ARCHITECTURE.md` : organisation Bronze / Silver / Gold et flux de publication.
+- `../pipeline/SOURCES.md` : source data.gouv, colonnes attendues et règles de lecture.
+- `../fabric/LAKEHOUSE.md` : structure Lakehouse côté Microsoft Fabric.
+- `../pipeline/README.md` : scripts de traitement et mode de relance.
+- `../site/README.md` : rôle du site public et du fichier JSON publié.
+
+## Principes retenus
+
+La documentation privilégie une lecture directe :
+
+- source utilisée ;
+- transformations réalisées ;
+- contrôles appliqués ;
+- sortie publiée ;
+- limites connues.
+
+L'objectif est de pouvoir comprendre rapidement le parcours de la donnée, depuis le fichier CSV public jusqu'au dashboard.

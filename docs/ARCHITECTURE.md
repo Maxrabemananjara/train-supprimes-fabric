@@ -1,55 +1,76 @@
-# Architecture cible
+# Architecture
 
-Le projet repose sur une architecture data simple et lisible, inspiree d'une approche medaillon.
+Le projet suit une architecture médaillon simple : Bronze, Silver, Gold. Cette organisation permet de séparer la donnée source, la donnée contrôlée et la donnée prête à être consommée par le dashboard.
 
-## 1. Source
-
-La source principale est le jeu de donnees public data.gouv :
+## Vue d'ensemble
 
 ```text
-Liste des trains SNCF supprimes
+data.gouv
+  -> Ingestion Bronze
+  -> Nettoyage Silver
+  -> Modèle Gold
+  -> Export dashboard.json
+  -> Publication GitHub Pages
 ```
 
-Le dataset est publie quotidiennement sous forme de fichiers CSV.
+## Source
 
-## 2. Bronze
+La source principale est le jeu public data.gouv `Liste des trains SNCF supprimés`.
 
-La couche Bronze conserve les fichiers bruts tels qu'ils sont recuperes.
+Les fichiers sont publiés au format CSV. Chaque ressource est lue à partir des métadonnées de l'API data.gouv, ce qui évite de dépendre d'un nom de fichier figé.
 
-Objectif :
+## Bronze
 
-- conserver une trace des donnees sources ;
-- permettre la reprise en cas d'erreur ;
-- documenter la fraicheur et l'origine des fichiers.
+La couche Bronze correspond à la récupération des données sources.
 
-## 3. Silver
+Elle conserve :
 
-La couche Silver contient les donnees nettoyees et controlees.
+- les colonnes d'origine ;
+- le titre de la ressource ;
+- l'URL source ;
+- la date de dernière modification ;
+- le nom du fichier source.
 
-Traitements prevus :
+Cette étape sert à garder une traçabilité claire avant tout nettoyage.
 
-- controle des colonnes attendues ;
-- normalisation des dates et heures ;
-- normalisation des types de trains ;
-- detection des doublons ;
-- controle de coherence sur les valeurs obligatoires.
+## Silver
 
-## 4. Gold
+La couche Silver contient les lignes nettoyées et contrôlées.
 
-La couche Gold produit les donnees pretes pour le site.
+Les principaux contrôles sont :
 
-Exemples de sorties :
+- présence des colonnes attendues ;
+- dates de départ exploitables ;
+- heures de départ et d'arrivée cohérentes ;
+- gares de départ et d'arrivée renseignées ;
+- type de train normalisé ;
+- suppression des doublons exacts.
 
-- indicateurs de synthese ;
-- evolution quotidienne ;
-- repartition par type de train ;
-- repartition par tranche horaire ;
-- top gares de depart et d'arrivee ;
-- metadata de mise a jour et statut qualite.
+Les rejets sont comptabilisés afin d'alimenter le suivi qualité.
 
-## 5. Site public
+## Gold
 
-Le site GitHub Pages lit les fichiers Gold et affiche un dashboard public.
+La couche Gold prépare les données pour l'usage métier.
 
-Le style retenu est une interface claire, professionnelle, avec navigation laterale, cartes KPI, graphiques et bloc de monitoring.
+Elle produit :
 
+- une table de faits des suppressions ;
+- une dimension date ;
+- une dimension gare ;
+- une dimension liaison ;
+- une dimension type de train ;
+- une dimension tranche horaire ;
+- des indicateurs de synthèse ;
+- les agrégats nécessaires aux graphiques.
+
+Le fichier public `site/data/dashboard.json` reprend ce modèle sous une forme directement exploitable par le site.
+
+## Publication
+
+GitHub Actions exécute la pipeline, met à jour le fichier public si besoin, puis publie le dossier `site/` avec GitHub Pages.
+
+Le dashboard ne contient pas de serveur applicatif. Toute la lecture se fait côté navigateur à partir du JSON publié.
+
+## Points de vigilance
+
+Le projet dépend du rythme de publication data.gouv. Si aucun nouveau fichier n'est publié, les volumes restent identiques, mais la date de contrôle quotidienne est tout de même actualisée.

@@ -1,22 +1,20 @@
 # Sources
 
-## Trains supprimes
+## Jeu de données principal
 
-La source principale est le jeu de donnees data.gouv suivant :
+Source : data.gouv
 
-```text
-Liste des trains SNCF supprimes
-```
+Jeu de données : `Liste des trains SNCF supprimés`
 
-API dataset :
+API :
 
 ```text
 https://www.data.gouv.fr/api/1/datasets/liste-des-trains-sncf-supprimes/
 ```
 
-Le jeu de donnees publie des fichiers CSV quotidiens. L'ingestion Bronze selectionne automatiquement la ressource CSV la plus recente a partir des metadonnees data.gouv.
+Le jeu de données publie des fichiers CSV. La pipeline sélectionne les ressources disponibles à partir de l'API, puis traite les fichiers nécessaires selon l'historique déjà présent dans `site/data/dashboard.json`.
 
-Colonnes attendues :
+## Colonnes attendues
 
 ```text
 departure_date
@@ -28,4 +26,15 @@ headsign
 type
 ```
 
-Les fichiers bruts sont conserves dans le Lakehouse avec une partition par date d'extraction.
+## Règles de lecture
+
+- `departure_date` sert de date de référence pour les analyses temporelles.
+- `departure` et `arrival` alimentent les dimensions gare et liaison.
+- `departure_time` permet de rattacher chaque suppression à une tranche horaire.
+- `type` est normalisé pour produire la répartition par type de train.
+
+## Qualité
+
+Les lignes incomplètes, incohérentes ou non exploitables sont écartées et comptabilisées dans les métadonnées du dashboard.
+
+Les doublons exacts sont supprimés avant la construction du modèle Gold.
