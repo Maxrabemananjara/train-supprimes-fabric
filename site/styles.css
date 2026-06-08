@@ -71,10 +71,13 @@ input {
 
 .eyebrow {
   color: var(--accent);
-  font-size: clamp(1.45rem, 1.85vw, 2rem);
+  max-width: 100%;
+  overflow: hidden;
+  font-size: clamp(2.35rem, 3vw, 3.15rem);
   font-weight: 900;
   line-height: 1;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 h1 {
