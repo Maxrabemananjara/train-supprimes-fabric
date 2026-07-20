@@ -16,9 +16,9 @@ lh_trains_supprimes
 
 ## Rôle de Fabric
 
-Microsoft Fabric est l'environnement de traitement du projet. Il réalise l'ingestion des données data.gouv, le stockage Bronze, les contrôles qualité et transformations Silver, la modélisation Gold ainsi que la production du fichier `dashboard.json` dans OneLake.
+Microsoft Fabric est l'environnement de traitement du projet. Les fichiers data.gouv arrivent dans Bronze, passent par les contrôles Silver, puis alimentent le modèle Gold et son export `dashboard.json`.
 
-GitHub Actions intervient uniquement après ce traitement : il récupère l'export Gold, le copie vers `site/data/dashboard.json` et publie le dossier `site/` avec GitHub Pages.
+La publication GitHub intervient après ce traitement. Elle ne reprend pas les règles métier déjà appliquées dans Fabric.
 
 ## Organisation
 
@@ -32,4 +32,4 @@ data.gouv
   → GitHub Pages : dashboard public
 ```
 
-La structure détaillée du Lakehouse est décrite dans `LAKEHOUSE.md`.
+La structure détaillée du Lakehouse est décrite dans `LAKEHOUSE.md`. La grille de contrôle associée se trouve dans `../docs/CONTROLES_QUALITE.md`.

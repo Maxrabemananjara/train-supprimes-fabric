@@ -71,8 +71,8 @@ gold_top_liaisons
 gold_qualite_pipeline
 ```
 
-Microsoft Fabric produit également dans cette zone le fichier `dashboard.json`, qui regroupe les faits, dimensions, indicateurs et agrégats nécessaires au site.
+Le fichier `dashboard.json` est déposé avec les sorties Gold. Il regroupe les faits, dimensions, indicateurs et agrégats nécessaires au site.
 
 ## Publication
 
-GitHub Actions s'authentifie auprès de OneLake, récupère le fichier `dashboard.json` produit dans Gold, le copie vers `site/data/dashboard.json`, puis publie le dossier `site/` avec GitHub Pages. La publication n'effectue aucune transformation métier.
+Une fois l'export disponible, GitHub Actions le copie vers `site/data/dashboard.json` et publie le dossier `site/`. À ce stade, le contenu métier est déjà figé.

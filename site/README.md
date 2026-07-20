@@ -19,9 +19,7 @@ data/dashboard.json     Copie publiée de l'export Gold
 
 ## Alimentation du site
 
-Microsoft Fabric réalise l’ingestion, les contrôles qualité, les transformations Silver et la modélisation Gold dans OneLake. GitHub Actions récupère ensuite l’export `dashboard.json` produit dans la couche Gold, le copie dans le dossier du site et publie le dashboard avec GitHub Pages.
-
-GitHub Actions constitue uniquement la couche de publication et n'effectue aucune transformation métier.
+Le site reçoit une copie de l'export Gold préparé dans Fabric. Il ne lit ni les CSV sources ni les zones Bronze et Silver : son seul point d'entrée est `data/dashboard.json`.
 
 ## Lecture du dashboard
 
@@ -38,7 +36,7 @@ Les indicateurs et graphiques se recalculent côté navigateur à partir du fich
 
 Le bouton `Rafraîchir les données` relit la dernière version publiée du fichier JSON. Il ne relance ni le traitement dans Microsoft Fabric ni la publication GitHub Actions.
 
-Une fois l'export Gold copié et le site republié, le bouton permet simplement de récupérer cette version sans attendre le cache du navigateur.
+Après une publication, le bouton permet simplement de récupérer la dernière version sans attendre l'expiration du cache du navigateur.
 
 ## Direction visuelle
 

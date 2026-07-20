@@ -14,7 +14,7 @@ data.gouv
   → GitHub Pages : dashboard public
 ```
 
-Microsoft Fabric réalise l’ingestion, les contrôles qualité, les transformations Silver et la modélisation Gold dans OneLake. GitHub Actions récupère ensuite l’export `dashboard.json` produit dans la couche Gold, le copie dans le dossier du site et publie le dashboard avec GitHub Pages.
+Fabric porte le traitement de bout en bout jusqu'à la couche Gold. La partie GitHub commence une fois l'export prêt : elle copie le JSON dans le site et déclenche sa publication.
 
 ## Source
 
@@ -49,7 +49,7 @@ Les principaux contrôles sont :
 - type de train normalisé ;
 - suppression des doublons exacts.
 
-Les rejets sont comptabilisés afin d'alimenter le suivi qualité.
+Les rejets sont comptabilisés dans le suivi qualité. Cela permet de distinguer un fichier réellement vide d'un fichier dont une partie des lignes n'a pas passé les contrôles.
 
 ## Gold
 
@@ -71,10 +71,10 @@ La copie publique `site/data/dashboard.json` reprend ce modèle sous une forme d
 
 ## Publication
 
-GitHub Actions s'authentifie auprès de OneLake, récupère l'export `dashboard.json` produit dans Gold, le copie vers `site/data/dashboard.json`, puis publie le dossier `site/` avec GitHub Pages. Aucune transformation métier n'est réalisée pendant cette étape.
+GitHub Actions prend ensuite le relais pour télécharger l'export, le placer dans `site/data/dashboard.json` et publier le dossier `site/`. Le modèle n'est pas recalculé pendant ce passage.
 
 Le dashboard ne contient pas de serveur applicatif. Toute la lecture se fait côté navigateur à partir du JSON publié.
 
 ## Points de vigilance
 
-Le projet dépend du rythme de publication data.gouv et de la disponibilité de l'export Gold dans OneLake. Si aucun nouveau fichier source n'est publié, les volumes restent identiques.
+Le projet dépend du rythme de publication data.gouv et de la disponibilité de l'export Gold dans OneLake. Si aucun nouveau fichier source n'est publié, les volumes restent identiques. Les contrôles utilisés pour valider chaque couche sont regroupés dans `CONTROLES_QUALITE.md`.

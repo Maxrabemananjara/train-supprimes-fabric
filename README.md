@@ -30,24 +30,24 @@ data.gouv
   → GitHub Pages : dashboard public
 ```
 
-Microsoft Fabric réalise l’ingestion, les contrôles qualité, les transformations Silver et la modélisation Gold dans OneLake. GitHub Actions récupère ensuite l’export `dashboard.json` produit dans la couche Gold, le copie dans le dossier du site et publie le dashboard avec GitHub Pages.
+Le traitement se fait dans Microsoft Fabric. OneLake conserve les données sources, les sorties contrôlées et le modèle Gold. Le fichier `dashboard.json` est généré à la fin de ce parcours, puis récupéré pour alimenter le site.
 
 Le site lit le fichier `site/data/dashboard.json`. Ce fichier contient les métadonnées de mise à jour, les dimensions, la table de faits et les agrégats utilisés par l'interface.
 
 ## Mise à jour
 
-La publication est automatisée avec GitHub Actions.
-
-La couche de publication GitHub Actions :
+GitHub Actions intervient seulement pour la mise en ligne :
 
 - s'authentifie auprès de OneLake ;
 - récupère le fichier `dashboard.json` produit dans la couche Gold ;
 - copie cet export vers `site/data/dashboard.json` ;
 - publie le dossier `site/` avec GitHub Pages.
 
-GitHub Actions n'effectue aucune transformation métier : l'ingestion, les contrôles et la construction du modèle Gold sont réalisés dans Microsoft Fabric.
-
 Le bouton `Rafraîchir les données` du dashboard ne relance pas le traitement. Il recharge simplement la dernière version publiée par GitHub Pages, ce qui évite les problèmes de cache côté navigateur.
+
+## Contrôles
+
+Les vérifications sont réparties entre les trois couches : conformité de la source en Bronze, nettoyage en Silver, puis cohérence des faits, dimensions et indicateurs en Gold. La grille utilisée pour la recette est détaillée dans [docs/CONTROLES_QUALITE.md](docs/CONTROLES_QUALITE.md).
 
 ## Structure du dépôt
 
@@ -63,10 +63,10 @@ data-samples/       Exemples légers non sensibles
 ## Lecture des dossiers
 
 - `fabric/` décrit l'ingestion, les couches Bronze / Silver / Gold et l'export produit dans OneLake.
-- `pipeline/` documente les règles métier, les contrôles et la modélisation réalisés dans Fabric.
+- `pipeline/` documente les règles métier et la source utilisée.
 - `site/` contient l'application web, le style et la copie publiée de l'export Gold.
 - `docs/` reprend l'architecture et les principes de qualité.
 
 ## État du projet
 
-Le dashboard est publié et alimenté par l'export Gold produit dans Microsoft Fabric. Le dépôt conserve une organisation claire pour montrer à la fois le résultat métier et la logique data engineering qui l'alimente.
+Le dashboard est publié et alimenté par l'export Gold produit dans Microsoft Fabric. Le dépôt rassemble surtout la documentation d'architecture et la partie publique du projet.

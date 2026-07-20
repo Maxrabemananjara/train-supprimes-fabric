@@ -1,6 +1,6 @@
 # Pipeline
 
-Ce dossier documente les règles de traitement du projet. Le flux opérationnel est exécuté dans Microsoft Fabric et OneLake.
+Ce dossier reprend les règles de traitement utiles pour comprendre le résultat publié. L'exécution est assurée dans Microsoft Fabric et OneLake.
 
 ## Flux de traitement
 
@@ -14,7 +14,7 @@ data.gouv
   → GitHub Pages : dashboard public
 ```
 
-## Traitements
+## Règles principales
 
 Microsoft Fabric prend en charge :
 
@@ -32,4 +32,6 @@ GitHub Actions est limité à la publication :
 - copie vers `site/data/dashboard.json` ;
 - publication du dossier `site/` avec GitHub Pages.
 
-Aucune transformation métier, construction d'indicateur ou mise à jour du modèle Gold n'est réalisée dans GitHub Actions.
+Le JSON récupéré est donc déjà prêt à être lu par le dashboard.
+
+Les contrôles attendus à chaque étape sont listés dans `../docs/CONTROLES_QUALITE.md`.
