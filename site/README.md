@@ -14,8 +14,14 @@ https://maxrabemananjara.github.io/train-supprimes-fabric/
 index.html              Structure de la page
 styles.css              Mise en forme du dashboard
 app.js                  Lecture du JSON, filtres et graphiques
-data/dashboard.json     Données publiées
+data/dashboard.json     Copie publiée de l'export Gold
 ```
+
+## Alimentation du site
+
+Microsoft Fabric réalise l’ingestion, les contrôles qualité, les transformations Silver et la modélisation Gold dans OneLake. GitHub Actions récupère ensuite l’export `dashboard.json` produit dans la couche Gold, le copie dans le dossier du site et publie le dashboard avec GitHub Pages.
+
+GitHub Actions constitue uniquement la couche de publication et n'effectue aucune transformation métier.
 
 ## Lecture du dashboard
 
@@ -30,9 +36,9 @@ Les indicateurs et graphiques se recalculent côté navigateur à partir du fich
 
 ## Bouton de rafraîchissement
 
-Le bouton `Rafraîchir les données` relit la dernière version publiée du fichier JSON. Il ne relance pas la pipeline data.
+Le bouton `Rafraîchir les données` relit la dernière version publiée du fichier JSON. Il ne relance ni le traitement dans Microsoft Fabric ni la publication GitHub Actions.
 
-La pipeline est exécutée par GitHub Actions. Une fois le fichier public republié, le bouton permet simplement de récupérer cette version sans attendre le cache du navigateur.
+Une fois l'export Gold copié et le site republié, le bouton permet simplement de récupérer cette version sans attendre le cache du navigateur.
 
 ## Direction visuelle
 

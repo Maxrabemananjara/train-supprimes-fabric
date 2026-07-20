@@ -12,7 +12,7 @@ API :
 https://www.data.gouv.fr/api/1/datasets/liste-des-trains-sncf-supprimes/
 ```
 
-Le jeu de données publie des fichiers CSV. La pipeline sélectionne les ressources disponibles à partir de l'API, puis traite les fichiers nécessaires selon l'historique déjà présent dans `site/data/dashboard.json`.
+Le jeu de données publie des fichiers CSV. Microsoft Fabric sélectionne les ressources disponibles à partir de l'API, puis les ingère dans la couche Bronze de OneLake avec leurs métadonnées.
 
 ## Colonnes attendues
 
@@ -35,6 +35,6 @@ type
 
 ## Qualité
 
-Les lignes incomplètes, incohérentes ou non exploitables sont écartées et comptabilisées dans les métadonnées du dashboard.
+Dans Microsoft Fabric, les lignes incomplètes, incohérentes ou non exploitables sont écartées en Silver et comptabilisées dans le suivi qualité.
 
-Les doublons exacts sont supprimés avant la construction du modèle Gold.
+Les doublons exacts sont supprimés avant la construction du modèle Gold et la production de `dashboard.json`.

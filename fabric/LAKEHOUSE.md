@@ -1,6 +1,6 @@
 # Structure Lakehouse
 
-Le Lakehouse est organisé selon une approche médaillon.
+Le Lakehouse est organisé selon une approche médaillon dans Microsoft Fabric. Il porte l'ensemble du traitement, depuis l'ingestion de la source data.gouv jusqu'à la production de l'export Gold utilisé par le dashboard.
 
 ## Lakehouse
 
@@ -23,7 +23,7 @@ Files/
 
 ## Bronze
 
-La zone Bronze conserve les fichiers sources et leurs métadonnées :
+La zone Bronze conserve les fichiers sources ingérés depuis data.gouv et leurs métadonnées :
 
 - nom de ressource ;
 - URL source ;
@@ -35,7 +35,7 @@ Elle permet de revenir à la donnée brute en cas de contrôle ou de reprise.
 
 ## Silver
 
-La zone Silver contient les données nettoyées.
+La zone Silver contient les données nettoyées et contrôlées dans Microsoft Fabric.
 
 Sortie attendue :
 
@@ -71,4 +71,8 @@ gold_top_liaisons
 gold_qualite_pipeline
 ```
 
-Ces sorties alimentent le fichier public `dashboard.json` utilisé par le site GitHub Pages.
+Microsoft Fabric produit également dans cette zone le fichier `dashboard.json`, qui regroupe les faits, dimensions, indicateurs et agrégats nécessaires au site.
+
+## Publication
+
+GitHub Actions s'authentifie auprès de OneLake, récupère le fichier `dashboard.json` produit dans Gold, le copie vers `site/data/dashboard.json`, puis publie le dossier `site/` avec GitHub Pages. La publication n'effectue aucune transformation métier.

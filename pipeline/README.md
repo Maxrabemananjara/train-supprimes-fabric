@@ -1,56 +1,35 @@
 # Pipeline
 
-Ce dossier contient les scripts qui alimentent le dashboard public.
+Ce dossier documente les règles de traitement du projet. Le flux opérationnel est exécuté dans Microsoft Fabric et OneLake.
 
 ## Flux de traitement
 
 ```text
-API data.gouv
-  -> récupération des CSV
-  -> contrôle Bronze
-  -> nettoyage Silver
-  -> modèle Gold faits / dimensions
-  -> export site/data/dashboard.json
+data.gouv
+  → Microsoft Fabric / OneLake
+  → Bronze : données sources et métadonnées
+  → Silver : données nettoyées et contrôlées
+  → Gold : faits, dimensions, indicateurs et dashboard.json
+  → GitHub Actions : récupération de l'export Gold
+  → GitHub Pages : dashboard public
 ```
 
-## Scripts
+## Traitements
 
-| Script | Rôle |
-| --- | --- |
-| `ingest_bronze.py` | Lit les ressources CSV data.gouv et conserve les métadonnées source. |
-| `transform_silver.py` | Nettoie les lignes, contrôle le schéma et produit le rapport qualité. |
-| `build_gold.py` | Construit les indicateurs, dimensions, faits et agrégats du dashboard. |
-| `build_site_data.py` | Met à jour le fichier public `site/data/dashboard.json`. |
-| `run_daily.py` | Exécute le flux complet avec les paramètres par défaut. |
+Microsoft Fabric prend en charge :
 
-## Relance locale
+- l'ingestion des ressources CSV et de leurs métadonnées dans Bronze ;
+- les contrôles de schéma, le nettoyage et la déduplication dans Silver ;
+- la construction des faits, dimensions, indicateurs et agrégats dans Gold ;
+- la production du fichier `dashboard.json` dans la zone Gold de OneLake.
 
-Reconstruire le fichier public à partir des ressources disponibles :
+## Publication
 
-```bash
-python pipeline/build_site_data.py
-```
+GitHub Actions est limité à la publication :
 
-Reconstruire l'historique complet :
+- authentification auprès de OneLake ;
+- récupération du fichier `dashboard.json` produit dans Gold ;
+- copie vers `site/data/dashboard.json` ;
+- publication du dossier `site/` avec GitHub Pages.
 
-```bash
-python pipeline/build_site_data.py --full
-```
-
-Relancer le flux quotidien :
-
-```bash
-python pipeline/run_daily.py
-```
-
-## Actualisation incrémentale
-
-Le script `build_site_data.py` lit le dernier `dashboard.json` publié. Il compare ensuite la fin de période connue avec les ressources CSV disponibles sur data.gouv.
-
-Si un nouveau fichier existe, il ajoute les lignes au modèle existant et recalcule les indicateurs.
-
-Si aucun nouveau fichier n'existe, il met uniquement à jour la date de contrôle du jour. Cela permet de distinguer une source inchangée d'une pipeline qui ne tourne pas.
-
-## Automatisation
-
-Le workflow GitHub Actions `Actualiser les donnees` exécute cette pipeline plusieurs fois par jour. En cas de changement du fichier public, le commit est réalisé avec le compte du dépôt et le site est republié.
+Aucune transformation métier, construction d'indicateur ou mise à jour du modèle Gold n'est réalisée dans GitHub Actions.
